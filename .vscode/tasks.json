@@ -1,0 +1,70 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🔧 Setup Environment Variables",
+            "type": "shell",
+            "command": "./scripts/setup-env.sh",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Interactive setup for environment variables and API keys"
+        },
+        {
+            "label": "📥 Fetch Noko Data",
+            "type": "shell",
+            "command": "./scripts/fetch-noko.sh",
+            "args": ["both", "7", "json"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always", 
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Fetch Noko time entries for both projects (last 7 days)"
+        },
+        {
+            "label": "🤖 LLM-Powered Geekbot (via Claude Code)",
+            "type": "shell",
+            "command": "./scripts/llm-geekbot.sh",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Generate Geekbot update using Claude Code CLI - fully automated!"
+        },
+        {
+            "label": "🏢 LLM-Powered LSM Reports (via Claude Code)",
+            "type": "shell",
+            "command": "./scripts/llm-weekly.sh",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [],
+            "detail": "Generate LSM reports using Claude Code CLI - fully automated!"
+        }
+    ]
+} 

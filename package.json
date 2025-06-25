@@ -1,0 +1,24 @@
+{
+  "name": "lsm-noko-reporting-automation",
+  "version": "1.0.0",
+  "description": "Automated reporting tools for Noko time tracking with LLM-powered processing",
+  "main": "scripts/generate-reports.js",
+  "scripts": {
+    "setup": "./scripts/setup-env.sh",
+    "llm-geekbot": "./scripts/llm-geekbot.sh",
+    "llm-weekly": "./scripts/llm-weekly.sh",
+    "fetch": "./scripts/fetch-noko.sh both 7 json",
+    "fetch-daily": "./scripts/fetch-noko.sh both 1 json"
+  },
+  "keywords": [
+    "reporting",
+    "automation",
+    "noko",
+    "timetracking"
+  ],
+  "author": "Lullabot",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
