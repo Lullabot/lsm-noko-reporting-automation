@@ -1,159 +1,316 @@
-# 🤖 Hivemind LLM-Powered Reporting Automation
+# 🤖 Noko Reporting Automation
 
-This automation system eliminates the manual copy/paste workflow for Noko time entries and generates professional, hashtag-free reports using Claude Code CLI.
+Automated reporting tools for Noko time tracking with LLM-powered processing. This system eliminates manual copy/paste workflows and generates professional, hashtag-free reports using Claude Code CLI.
 
-## 🔧 Setup
+## ✨ Features
 
-### 1. Environment Variables
-Create a `.env` file in the project root:
-
-```bash
-NOKO_API_TOKEN=your_noko_api_token_here
-NOKO_USER_ID=your_user_id_here  # Optional - defaults to 8372
-CATIC_PROJECT_ID=your_catic_project_id  # Optional - defaults to 701450
-SDSU_PROJECT_ID=your_sdsu_project_id    # Optional - defaults to 701708
-ANTHROPIC_API_KEY=your_anthropic_api_key_here  # For LLM processing
-```
-
-**Getting your API keys:**
-- **Noko API token:** Go to [Noko API settings](https://api.nokotime.com/v2/me)
-- **Anthropic API key:** Go to [Anthropic Console](https://console.anthropic.com/)
-
-### 2. Install Claude Code CLI
-```bash
-# Install Claude Code CLI globally
-npm install -g @anthropic-ai/claude-code
-
-# Verify installation
-claude --version
-```
-
-### 3. Quick Setup (Recommended)
-```bash
-# Interactive setup script - walks you through everything
-npm run setup
-```
-
-### 4. Test the Setup
-```bash
-# Test LLM-powered Geekbot update
-npm run llm-geekbot
-
-# Test LLM-powered weekly reports
-npm run llm-weekly
-```
+- **🔄 Automated Data Fetching**: Direct integration with Noko API
+- **🤖 LLM-Powered Processing**: Clean, professional report generation via Claude Code CLI
+- **📋 Multiple Project Support**: Configure any number of projects dynamically
+- **🌍 Cross-Platform**: Works on macOS, Linux, and Windows
+- **📱 Smart Clipboard**: Automatic clipboard integration (configurable)
+- **🎯 Multiple Report Formats**: Daily updates and weekly summaries
+- **⚙️ Flexible Configuration**: Environment-based setup for any team
 
 ## 🚀 Quick Start
 
-### Daily Geekbot Updates
+### 1. Install Dependencies
+
+**Required:**
+- Node.js (v14+)
+- curl
+- jq
+
+**Installation:**
+```bash
+# macOS
+brew install curl jq node
+
+# Ubuntu/Debian  
+sudo apt-get install curl jq nodejs
+
+# Windows (via WSL or native)
+# Install Node.js from nodejs.org
+# Install WSL and follow Linux instructions
+```
+
+### 2. Install Claude Code CLI
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+### 3. Interactive Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/Lullabot/lsm-noko-reporting-automation.git
+cd lsm-noko-reporting-automation
+
+# Run interactive setup
+npm run setup
+```
+
+The setup script will guide you through:
+- Noko API token configuration
+- Project names and IDs
+- Directory structure creation
+- Dependency checking
+- API validation
+
+### 4. Test Your Setup
+
+```bash
+# Test daily reports
+npm run llm-geekbot
+
+# Test weekly reports  
+npm run llm-weekly
+```
+
+## 📋 Usage
+
+### Daily Updates
+
+Generate clean daily reports for standup/status meetings:
+
 ```bash
 npm run llm-geekbot
 ```
-**What it does:** 
-1. Fetches your personal Noko data from yesterday and today
-2. Processes it with Claude Code CLI to remove hashtags and create professional summaries
-3. Formats it for Geekbot's 3-section structure
-4. Copies clean result to clipboard - ready to paste!
 
-### Weekly Reports  
+**Output format:**
+```
+**Section 1 (What's new since your last update?):**
+ProjectName:
+* Clean summary of accomplishments (hashtags removed)
+
+**Section 2 (What will you do today?):**
+Monitor for new issues and respond
+Be available for client communications
+
+**Section 3 (Anything blocking your progress?):**
+No current blockers
+```
+
+### Weekly Reports
+
+Generate comprehensive weekly summaries:
+
 ```bash
 npm run llm-weekly
 ```
-**What it does:** 
-1. Fetches weekly team Noko data
-2. Processes it with Claude Code CLI for professional formatting
-3. Generates both LSM Office Hour and Weekly Update formats
-4. Copies results to clipboard - ready to paste!
 
-### VS Code Integration
-1. Open Command Palette (`Cmd+Shift+P`)
-2. Type "Tasks: Run Task"
-3. Choose from:
-   - `🤖 LLM-Powered Geekbot (via Claude Code)` ⭐ **Daily Updates**
-   - `🏢 LLM-Powered LSM Reports (via Claude Code)` ⭐ **Weekly Reports**
-   - `📥 Fetch Noko Data` (Manual data fetch if needed)
-   - `🔧 Setup Environment Variables` (Initial setup)
+**Output includes:**
+- Office hour status updates with color indicators
+- Detailed weekly project summaries
+- Accomplishments and next steps
 
-## 📋 Report Types Generated
+### Manual Data Operations
 
-### Daily Geekbot Updates
-Professional 3-section format ready for Geekbot:
-1. **What's new since your last update?** - Your personal LSM activities (hashtags removed)
-2. **What will you do today?** - Standard forward-looking tasks
-3. **Anything blocking your progress?** - "No current blockers" (or actual blockers if any)
-
-### Weekly Reports  
-- **LSM Office Hour Format**: Project status with color indicators
-- **LSM Weekly Update Format**: Comprehensive weekly summary
-
-## 🎯 Your New Workflow
-
-### Daily (Geekbot)
-1. Run: `npm run llm-geekbot`
-2. Clean, professional update is automatically copied to clipboard
-3. Paste sections into Geekbot when prompted
-4. Done! No manual processing needed.
-
-### Weekly (Wednesday - LSM Office Hour)
-1. Run: `npm run llm-weekly`
-2. Both report formats are automatically copied to clipboard
-3. Use the appropriate format for each channel
-4. Done! No manual processing needed.
-
-## 🔧 Advanced Usage
-
-### Manual Data Fetching
 ```bash
-# Fetch both projects, last 7 days
+# Fetch data for all projects (7 days)
 npm run fetch
 
-# Fetch just today's data
+# Fetch daily data only
 npm run fetch-daily
+
+# Generate raw data for custom processing
+node scripts/generate-reports.js raw-weekly
+node scripts/generate-reports.js clean-geekbot
 ```
 
-### File Locations
-**Noko Data Saved To:**
-- `agents/CATIC/pm/logs/noko-YYYY-MM-DD.json`
-- `agents/SDSU/pm/logs/noko-YYYY-MM-DD.json`
+## ⚙️ Configuration
 
-**Reports Use:**
-- Latest Noko JSON files
-- Project memory bank files (`agents/*/memory-bank/`) for context
+### Environment Variables
 
-## ⚙️ Technical Details
+Create a `.env` file (or use `npm run setup`):
 
-### What's Fully Automated
-- ✅ Noko API data fetching (no more manual copy/paste)
-- ✅ LSM activity filtering (ignores Internal/Sales entries)
-- ✅ Professional text processing via Claude Code CLI
-- ✅ Hashtag removal and text cleanup
-- ✅ Report formatting for all channels
-- ✅ Clipboard integration (ready to paste)
-- ✅ VS Code integration (Command Palette access)
+```bash
+# Core Noko Configuration
+NOKO_API_TOKEN=your_noko_api_token_here
+NOKO_USER_ID=your_user_id_here
 
-### Key Features
-- **Smart Date Filtering**: Includes entries from yesterday and today for daily updates
-- **User-Specific Filtering**: Only your entries (User ID 8372) for Geekbot updates
-- **Professional Summarization**: Claude Code CLI removes hashtags and creates readable summaries
-- **Multiple Format Support**: Generates different formats for different reporting needs
-- **Cross-Platform**: Works on macOS and Linux
+# Project Configuration
+PROJECTS=ProjectA,ProjectB,ProjectC
+PROJECTA_PROJECT_ID=123456
+PROJECTB_PROJECT_ID=789012
+PROJECTC_PROJECT_ID=345678
 
-### Dependencies
-- `curl` (for Noko API calls)
-- `jq` (for JSON processing)
-- `node` (for data processing)
-- `pbcopy` (for clipboard integration - macOS)
-- `@anthropic-ai/claude-code` (for LLM processing)
+# LLM Configuration  
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Directory Configuration
+DATA_DIR=./data
+MEMORY_BANK_ENABLED=true
+
+# Report Configuration
+DEFAULT_DAYS_BACK=1
+CLIPBOARD_ENABLED=true
+```
+
+### Project Directory Structure
+
+Data is organized as:
+```
+data/
+├── ProjectA/
+│   ├── logs/           # Noko JSON files
+│   └── memory-bank/    # Project context (optional)
+├── ProjectB/
+│   ├── logs/
+│   └── memory-bank/
+└── ProjectC/
+    ├── logs/
+    └── memory-bank/
+```
+
+### API Keys
+
+**Noko API Token:**
+1. Visit [Noko API Settings](https://api.nokotime.com/v2/me)
+2. Generate a new API token
+3. Find your user ID in the response
+
+**Anthropic API Key:**
+1. Visit [Anthropic Console](https://console.anthropic.com/)
+2. Create an API key
+3. Ensure you have Claude access
+
+**Noko Project IDs:**
+- Found in your Noko dashboard URL
+- Or use the API: `curl -H "X-NokoToken: TOKEN" https://api.nokotime.com/v2/projects`
+
+## 🔧 Advanced Configuration
+
+### Cross-Platform Clipboard
+
+The system automatically detects available clipboard utilities:
+- **macOS**: `pbcopy` (built-in)
+- **Linux**: `xclip` or `xsel` 
+- **Windows**: `clip` (via WSL or PowerShell)
+
+Disable clipboard: `CLIPBOARD_ENABLED=false`
+
+### Custom Data Directory
+
+Change where data is stored:
+```bash
+DATA_DIR=/path/to/your/data
+```
+
+### Memory Bank Integration
+
+Enable project context for enhanced reporting:
+```bash
+MEMORY_BANK_ENABLED=true
+```
+
+Add context files to `data/ProjectName/memory-bank/`:
+- `activeContext.md` - Current focus
+- `progress.md` - Status and next steps
+- `productContext.md` - Project background
+
+## 🛠️ Development
+
+### Project Structure
+
+```
+lsm-noko-reporting-automation/
+├── scripts/
+│   ├── fetch-noko.sh       # Noko API data fetching
+│   ├── generate-reports.js # Report data processing
+│   ├── llm-geekbot.sh     # Daily update automation
+│   ├── llm-weekly.sh      # Weekly report automation
+│   └── setup-env.sh       # Interactive setup
+├── package.json           # NPM scripts and metadata
+├── .env.example          # Configuration template
+└── README.md             # Documentation
+```
+
+### NPM Scripts
+
+```bash
+npm run setup          # Interactive environment setup
+npm run llm-geekbot    # Generate daily reports
+npm run llm-weekly     # Generate weekly reports  
+npm run fetch          # Fetch 7 days of data
+npm run fetch-daily    # Fetch 1 day of data
+```
+
+### Script API
+
+```bash
+# Direct script usage
+./scripts/fetch-noko.sh ProjectName 7 json
+node scripts/generate-reports.js raw-weekly
+./scripts/llm-geekbot.sh
+```
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
-- **"NOKO_API_TOKEN not set"**: Run `npm run setup` to configure environment variables
-- **"claude command not found"**: Install Claude Code CLI with `npm install -g @anthropic-ai/claude-code`
-- **"No entries found"**: Check that you have recent Noko entries and the API token is valid
-- **"Invalid API key"**: Verify your `ANTHROPIC_API_KEY` in the `.env` file
 
-### Getting Help
-1. Check that all environment variables are set correctly
-2. Verify API keys are valid and have proper permissions
-3. Test with `npm run setup` to validate configuration 
+**"NOKO_API_TOKEN not set"**
+- Run `npm run setup` to configure environment
+- Ensure `.env` file exists with valid token
+
+**"claude command not found"**
+- Install: `npm install -g @anthropic-ai/claude-code`
+- Verify: `claude --version`
+
+**"No entries found"**
+- Check Noko API token validity
+- Verify project IDs are correct
+- Ensure you have time entries in the specified date range
+
+**"Project ID not found"**
+- Add `PROJECTNAME_PROJECT_ID=123456` to `.env`
+- Find project IDs in Noko dashboard or via API
+
+**Clipboard not working**
+- Install clipboard utility for your platform
+- Or set `CLIPBOARD_ENABLED=false`
+
+### Dependency Issues
+
+**Missing `jq`:**
+```bash
+# macOS
+brew install jq
+
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# CentOS/RHEL
+sudo yum install jq
+```
+
+**Missing `curl`:**
+- Usually pre-installed on Unix systems
+- Windows: Available in PowerShell or WSL
+
+### Validation
+
+Test your configuration:
+```bash
+# Validate environment
+npm run setup
+
+# Test API connectivity
+curl -H "X-NokoToken: $NOKO_API_TOKEN" https://api.nokotime.com/v2/me
+
+# Test Claude Code CLI
+claude --version
+```
+
+## 📝 License
+
+MIT License - see LICENSE file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+For issues or feature requests, please use GitHub Issues.
