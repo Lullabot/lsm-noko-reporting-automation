@@ -44,11 +44,12 @@ echo "🔍 Using Claude at: $CLAUDE_CMD"
 
 # Fetch latest Noko data
 echo "📥 Fetching Noko data..."
-./scripts/fetch-noko.sh both 2 json
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/fetch-noko.sh" both 2 json
 
 # Generate raw data for LLM processing
 echo "📝 Generating raw data for LLM..."
-RAW_DATA=$(node scripts/generate-reports.js clean-geekbot 2>/dev/null)
+RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-geekbot 2>/dev/null)
 
 # Check if we have data to process
 if [ -z "$RAW_DATA" ] || echo "$RAW_DATA" | grep -q "No entries found"; then

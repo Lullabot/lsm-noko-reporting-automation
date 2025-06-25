@@ -30,16 +30,26 @@ BASE_URL="https://api.nokotime.com/v2"
 
 # Function to get project ID
 get_project_id() {
-    case "$1" in
-        "CATIC") echo "${CATIC_PROJECT_ID:-701450}" ;;
-        "SDSU") echo "${SDSU_PROJECT_ID:-701708}" ;;
-        *) echo "" ;;
-    esac
+    local project_name="$1"
+    local env_var="${project_name}_PROJECT_ID"
+    local project_id="${!env_var}"
+    
+    if [ -z "$project_id" ]; then
+        echo "❌ Project ID not found for $project_name. Please set ${env_var} in your .env file."
+        return 1
+    fi
+    
+    echo "$project_id"
 }
+
+# Configuration
+DATA_DIR="${DATA_DIR:-./data}"
+PROJECTS="${PROJECTS:-CATIC,SDSU}"
+DEFAULT_DAYS_BACK="${DEFAULT_DAYS_BACK:-7}"
 
 # Default parameters
 PROJECT_NAME=${1:-"both"}
-DAYS_BACK=${2:-7}
+DAYS_BACK=${2:-$DEFAULT_DAYS_BACK}
 OUTPUT_FORMAT=${3:-"md"}
 
 # Function to get date range
@@ -88,7 +98,7 @@ save_data() {
     local format=$3
     local end_date=$4
     
-    local output_dir="agents/${project_name}/pm/logs"
+    local output_dir="${DATA_DIR}/${project_name}/logs"
     local filename="noko-${end_date}.${format}"
     local filepath="${output_dir}/${filename}"
     
@@ -114,7 +124,11 @@ main() {
     
     # Process projects
     if [[ "$PROJECT_NAME" == "both" ]]; then
-        projects=("CATIC" "SDSU")
+        IFS=',' read -ra projects <<< "$PROJECTS"
+        # Trim whitespace from each project name
+        for i in "${!projects[@]}"; do
+            projects[i]=$(echo "${projects[i]}" | xargs)
+        done
     else
         projects=("$PROJECT_NAME")
     fi

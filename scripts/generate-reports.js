@@ -22,9 +22,17 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // Configuration
-const CONFIG = {
-  projects: ['CATIC', 'SDSU']
-};
+function getConfig() {
+  const dataDir = process.env.DATA_DIR || './data';
+  const projects = process.env.PROJECTS ? process.env.PROJECTS.split(',').map(p => p.trim()) : ['CATIC', 'SDSU'];
+  
+  return {
+    dataDir,
+    projects
+  };
+}
+
+const CONFIG = getConfig();
 
 // Utility functions
 function getCurrentDate() {
@@ -58,7 +66,7 @@ function readJsonFile(filepath) {
 }
 
 function readMemoryBank(project) {
-  const memoryBankPath = `agents/${project}/memory-bank`;
+  const memoryBankPath = path.join(CONFIG.dataDir, project, 'memory-bank');
   const memoryBank = {};
   
   try {
@@ -92,10 +100,10 @@ function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) 
   }
   
   let rawData = '';
-  const JERAD_USER_ID = parseInt(process.env.NOKO_USER_ID) || 8372; // User's Noko user ID (configurable via env var)
+  const USER_ID = parseInt(process.env.NOKO_USER_ID) || 8372; // User's Noko user ID (configurable via env var)
   
   CONFIG.projects.forEach(project => {
-    const nokoFile = `agents/${project}/pm/logs/noko-${getCurrentDate()}.json`;
+    const nokoFile = path.join(CONFIG.dataDir, project, 'logs', `noko-${getCurrentDate()}.json`);
     const entries = readJsonFile(nokoFile);
     
     if (!entries || entries.length === 0) {
@@ -105,11 +113,11 @@ function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) 
     // Filter entries based on report type
     let filteredEntries;
     if (reportType === 'geekbot') {
-      // For Geekbot: only Jerad's LSM entries
+      // For Geekbot: only user's LSM entries
       const lsmEntries = filterLsmEntries(entries);
-      const jeradEntries = lsmEntries.filter(entry => entry.user.id === JERAD_USER_ID);
+      const userEntries = lsmEntries.filter(entry => entry.user.id === USER_ID);
       
-      filteredEntries = jeradEntries.filter(entry => {
+      filteredEntries = userEntries.filter(entry => {
         const entryDate = new Date(entry.date);
         const today = new Date();
         const cutoffDate = new Date();
