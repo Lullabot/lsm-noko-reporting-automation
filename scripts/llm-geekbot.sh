@@ -42,6 +42,32 @@ fi
 
 echo "🔍 Using Claude at: $CLAUDE_CMD"
 
+# Cross-platform clipboard function
+copy_to_clipboard() {
+    local content="$1"
+    if [ "${CLIPBOARD_ENABLED:-true}" = "false" ]; then
+        echo "📋 Clipboard disabled via CLIPBOARD_ENABLED=false"
+        return 0
+    fi
+    
+    if command -v pbcopy &> /dev/null; then
+        # macOS
+        echo "$content" | pbcopy
+    elif command -v xclip &> /dev/null; then
+        # Linux with xclip
+        echo "$content" | xclip -selection clipboard
+    elif command -v xsel &> /dev/null; then
+        # Linux with xsel
+        echo "$content" | xsel --clipboard --input
+    elif command -v clip &> /dev/null; then
+        # Windows/WSL
+        echo "$content" | clip
+    else
+        echo "⚠️  No clipboard utility found. Install pbcopy (macOS), xclip/xsel (Linux), or clip (Windows)"
+        return 1
+    fi
+}
+
 # Fetch latest Noko data
 echo "📥 Fetching Noko data..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -54,16 +80,18 @@ RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-geekbot 2>/dev/null)
 # Check if we have data to process
 if [ -z "$RAW_DATA" ] || echo "$RAW_DATA" | grep -q "No entries found"; then
     echo "⚠️  No recent entries found. Generating fallback response..."
-    echo "**Section 1 (What's new since your last update?):**
+    fallback_response="**Section 1 (What's new since your last update?):**
 No new LSM project activities in the past day.
 
 **Section 2 (What will you do today?):**
-Monitor for new issues on both CATIC and SDSU projects and respond
+Monitor for new issues on both projects and respond
 Be available for client communications and urgent requests
 Continue ongoing development and maintenance tasks
 
 **Section 3 (Anything blocking your progress?):**
-No current blockers" | pbcopy 2>/dev/null
+No current blockers"
+    
+    copy_to_clipboard "$fallback_response"
     echo "✅ Fallback response copied to clipboard!"
     exit 0
 fi
@@ -96,7 +124,7 @@ echo "🤖 Processing with Claude Code..."
 RESULT=$(echo "$RAW_DATA" | "$CLAUDE_CMD" --system-prompt "$SYSTEM_PROMPT" -p 2>&1)
 
 if [ $? -eq 0 ] && [ -n "$RESULT" ]; then
-    echo "$RESULT" | pbcopy 2>/dev/null
+    copy_to_clipboard "$RESULT"
     echo "✅ Geekbot update generated and copied to clipboard!"
     echo ""
     echo "📋 Generated response:"

@@ -34,6 +34,13 @@ function getConfig() {
 
 const CONFIG = getConfig();
 
+// Utility function to ensure directories exist
+function ensureDirectoryExists(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
+
 // Utility functions
 function getCurrentDate() {
   return new Date().toISOString().split('T')[0];

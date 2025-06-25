@@ -42,6 +42,32 @@ fi
 
 echo "🔍 Using Claude at: $CLAUDE_CMD"
 
+# Cross-platform clipboard function
+copy_to_clipboard() {
+    local content="$1"
+    if [ "${CLIPBOARD_ENABLED:-true}" = "false" ]; then
+        echo "📋 Clipboard disabled via CLIPBOARD_ENABLED=false"
+        return 0
+    fi
+    
+    if command -v pbcopy &> /dev/null; then
+        # macOS
+        echo "$content" | pbcopy
+    elif command -v xclip &> /dev/null; then
+        # Linux with xclip
+        echo "$content" | xclip -selection clipboard
+    elif command -v xsel &> /dev/null; then
+        # Linux with xsel
+        echo "$content" | xsel --clipboard --input
+    elif command -v clip &> /dev/null; then
+        # Windows/WSL
+        echo "$content" | clip
+    else
+        echo "⚠️  No clipboard utility found. Install pbcopy (macOS), xclip/xsel (Linux), or clip (Windows)"
+        return 1
+    fi
+}
+
 # Fetch latest Noko data
 echo "📥 Fetching weekly Noko data..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -54,15 +80,11 @@ RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-weekly 2>/dev/null)
 # Check if we have data to process
 if [ -z "$RAW_DATA" ] || echo "$RAW_DATA" | grep -q "No entries found"; then
     echo "⚠️  No entries found this week. Generating fallback response..."
-    echo "**REPORT 1: LSM Office Hour Update**
-CATIC :large_green_circle:
-- No updates this week.
-
-SDSU :large_green_circle:
-- No updates this week.
+    fallback_response="**REPORT 1: LSM Office Hour Update**
+No updates this week for configured projects.
 
 **REPORT 2: LSM Weekly Update**
-## CATIC Project Update
+## Project Updates
 **This Week:**
 - No significant activity
 
@@ -70,17 +92,9 @@ SDSU :large_green_circle:
 - Monitor for new issues and client requests
 - Continue maintenance activities
 
-**Status:** On track
-
-## SDSU Project Update
-**This Week:**
-- No significant activity
-
-**Next Week:**
-- Monitor for new issues and client requests
-- Continue maintenance activities
-
-**Status:** On track" | pbcopy 2>/dev/null
+**Status:** On track"
+    
+    copy_to_clipboard "$fallback_response"
     echo "✅ Fallback response copied to clipboard!"
     exit 0
 fi
@@ -124,7 +138,7 @@ if echo "$RESULT" | grep -qi "execution error\|failed\|invalid\|exception" && ! 
     echo "2. Open Cursor chat (⌘+L) or Claude.ai"
     echo "3. Ask Claude to format it for both weekly report formats"
 elif [ -n "$RESULT" ]; then
-    echo "$RESULT" | pbcopy 2>/dev/null
+    copy_to_clipboard "$RESULT"
     echo "✅ Weekly reports generated and copied to clipboard!"
     echo ""
     echo "📋 Generated reports:"
