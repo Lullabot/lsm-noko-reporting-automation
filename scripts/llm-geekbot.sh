@@ -71,11 +71,21 @@ copy_to_clipboard() {
 # Fetch latest Noko data
 echo "📥 Fetching Noko data..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/fetch-noko.sh" both 2 json
+
+# Check if it's Monday and adjust days back
+CURRENT_DAY=$(date +%u)  # 1=Monday, 7=Sunday
+if [ "$CURRENT_DAY" -eq 1 ]; then
+    echo "🗓️  It's Monday - fetching 4 days back to include Friday's activity"
+    DAYS_BACK=4
+else
+    DAYS_BACK=2
+fi
+
+"$SCRIPT_DIR/fetch-noko.sh" both $DAYS_BACK json
 
 # Generate raw data for LLM processing
 echo "📝 Generating raw data for LLM..."
-RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-geekbot 2>/dev/null)
+RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-geekbot $DAYS_BACK 2>/dev/null)
 
 # Check if we have data to process
 if [ -z "$RAW_DATA" ] || echo "$RAW_DATA" | grep -q "No entries found"; then

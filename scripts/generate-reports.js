@@ -198,7 +198,7 @@ function main() {
       break;
       
     case 'clean-geekbot':
-      const cleanGeekbot = generateRawDataForLLM(1, 'geekbot', true);
+      const cleanGeekbot = generateRawDataForLLM(args[1] ? parseInt(args[1]) : 1, 'geekbot', true);
       console.log(cleanGeekbot || 'No entries found');
       break;
       
