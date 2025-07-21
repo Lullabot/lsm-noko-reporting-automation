@@ -18,7 +18,7 @@ echo ""
 
 # Noko API Token (required)
 echo "🔑 NOKO API TOKEN (Required)"
-echo "Get your token from: https://api.nokotime.com/v2/me"
+echo "Get your token from your Noko account settings"
 read -p "Enter your Noko API token: " noko_token
 
 if [ -z "$noko_token" ]; then
@@ -29,7 +29,7 @@ fi
 # Noko User ID (optional)
 echo ""
 echo "👤 NOKO USER ID (Optional - defaults to 8372)"
-echo "Find your user ID by calling: curl -H \"X-NokoToken: YOUR_TOKEN\" https://api.nokotime.com/v2/me"
+echo "Find your user ID by calling: curl -H \"X-NokoToken: YOUR_TOKEN\" https://api.nokotime.com/v2/current_user"
 read -p "Enter your Noko user ID (or press Enter for default): " noko_user_id
 
 # Project Configuration
@@ -180,7 +180,7 @@ export $(cat .env | grep -v '^#' | xargs)
 
 # Test Noko API
 echo "Testing Noko API connection..."
-response=$(curl -s -H "X-NokoToken: $NOKO_API_TOKEN" "https://api.nokotime.com/v2/me")
+response=$(curl -s -H "X-NokoToken: $NOKO_API_TOKEN" "https://api.nokotime.com/v2/current_user")
 
 if echo "$response" | grep -q '"id"'; then
     echo "✅ Noko API connection successful!"

@@ -38,7 +38,12 @@ sudo apt-get install curl jq nodejs
 
 ```bash
 npm install -g @anthropic-ai/claude-code
+
+# Verify installation
+claude --version
 ```
+
+**Note:** Claude Code CLI is required for the LLM-powered report generation features.
 
 ### 3. Interactive Setup
 
@@ -167,9 +172,9 @@ data/
 ### API Keys
 
 **Noko API Token:**
-1. Visit [Noko API Settings](https://api.nokotime.com/v2/me)
-2. Generate a new API token
-3. Find your user ID in the response
+1. Visit your Noko account settings to generate an API token
+2. Test your token: `curl -H "X-NokoToken: YOUR_TOKEN" https://api.nokotime.com/v2/current_user`
+3. Find your user ID in the JSON response (look for the "id" field)
 
 **Anthropic API Key:**
 1. Visit [Anthropic Console](https://console.anthropic.com/)
@@ -263,6 +268,11 @@ node scripts/generate-reports.js raw-weekly
 - Verify project IDs are correct
 - Ensure you have time entries in the specified date range
 
+**API returns 404 or no response**
+- Ensure you're using the correct endpoint: `/v2/current_user` (not `/v2/me`)
+- Test with verbose output: `curl -v -H "X-NokoToken: YOUR_TOKEN" https://api.nokotime.com/v2/current_user`
+- Verify your API token has proper permissions
+
 **"Project ID not found"**
 - Add `PROJECTNAME_PROJECT_ID=123456` to `.env`
 - Find project IDs in Noko dashboard or via API
@@ -297,7 +307,7 @@ Test your configuration:
 npm run setup
 
 # Test API connectivity
-curl -H "X-NokoToken: $NOKO_API_TOKEN" https://api.nokotime.com/v2/me
+curl -H "X-NokoToken: $NOKO_API_TOKEN" https://api.nokotime.com/v2/current_user
 
 # Test Claude Code CLI
 claude --version
