@@ -1,3 +1,6 @@
 .env
 .env.backup*
 data/
+# Process baseline temp files
+temp_scratch_*.md
+.cursor/rules-backup-*
