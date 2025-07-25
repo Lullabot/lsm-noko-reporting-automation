@@ -44,9 +44,18 @@ function getConfig() {
     console.warn(`⚠️  No project directories found in ${dataDir}, using: ${projects.join(', ')}`);
   }
   
+  // Special bucket project IDs for LSM and Internal categorization
+  const specialBuckets = {
+    lsm: '560795',        // Main LSM Noko bucket
+    internal: '17045',    // Internal Noko bucket  
+    drainpipe: '687916',  // Drainpipe project
+    lullabotdotcom: '550434' // Lullabotdotcom project
+  };
+  
   return {
     dataDir,
-    projects
+    projects,
+    specialBuckets
   };
 }
 
@@ -155,6 +164,77 @@ function filterLsmEntries(entries) {
   return uniqueEntries;
 }
 
+/**
+ * Enhanced categorization for geekbot reports
+ * 
+ * Categories:
+ * 1. Client Projects: [LSM] prefixed projects (DH, GovHub, MJFF, etc.)
+ * 2. LSM General: Administrative work + LSM bucket + drainpipe + lullabotdotcom (when not client-specific)
+ * 3. Internal: #internal tagged + Internal bucket + company-wide activities
+ * 4. Other: Any uncategorized entries (auto-categorized)
+ */
+function categorizeEntriesForGeekbot(allEntries, userId) {
+  const categories = {
+    clientProjects: {},  // Key = project name, Value = entries array
+    lsm: [],            // General LSM activities
+    internal: [],       // Internal activities  
+    other: []           // Uncategorized entries
+  };
+  
+  // Filter to user's entries only
+  const userEntries = allEntries.filter(entry => entry.user.id === userId);
+  
+  userEntries.forEach(entry => {
+    const projectId = entry.project?.id?.toString();
+    const projectName = entry.project?.name || '';
+    const tags = entry.tags || [];
+    
+    // Check for internal tags
+    const hasInternalTag = tags.some(tag => 
+      tag.name.toLowerCase().includes('internal') || 
+      tag.name.toLowerCase().includes('sales')
+    );
+    
+    // Category 1: Client Projects ([LSM] prefixed)
+    if (projectName.includes('[LSM]')) {
+      // Extract clean project name for grouping
+      const cleanProjectName = projectName.replace(/^\[LSM\]\s*/, '').trim();
+      // Try to match with discovered project directories
+      const matchedProject = CONFIG.projects.find(proj => 
+        cleanProjectName.toLowerCase().includes(proj.toLowerCase()) ||
+        proj.toLowerCase().includes(cleanProjectName.toLowerCase())
+      );
+      
+      const categoryKey = matchedProject || cleanProjectName.split(' ')[0]; // Use first word if no match
+      
+      if (!categories.clientProjects[categoryKey]) {
+        categories.clientProjects[categoryKey] = [];
+      }
+      categories.clientProjects[categoryKey].push(entry);
+      return;
+    }
+    
+    // Category 3: Internal (check first since it's more specific)
+    if (hasInternalTag || projectId === CONFIG.specialBuckets.internal) {
+      categories.internal.push(entry);
+      return;
+    }
+    
+    // Category 2: LSM General
+    if (projectId === CONFIG.specialBuckets.lsm || 
+        projectId === CONFIG.specialBuckets.drainpipe ||
+        projectId === CONFIG.specialBuckets.lullabotdotcom) {
+      categories.lsm.push(entry);
+      return;
+    }
+    
+    // Category 4: Other - uncategorized entries (make best guess)
+    categories.other.push(entry);
+  });
+  
+  return categories;
+}
+
 // Function to generate raw data for LLM processing
 function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) {
   if (!quiet) {
@@ -170,6 +250,9 @@ function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) 
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
   
+  // Collect all entries from all project directories
+  let allEntries = [];
+  
   CONFIG.projects.forEach(project => {
     const logsDir = path.join(CONFIG.dataDir, project, 'logs');
     
@@ -178,7 +261,6 @@ function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) 
     }
     
     // Get all available Noko files
-    let allEntries = [];
     try {
       const files = fs.readdirSync(logsDir)
         .filter(file => file.startsWith('noko-') && file.endsWith('.json'))
@@ -193,57 +275,112 @@ function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) 
       }
     } catch (error) {
       console.warn(`⚠️  Could not read logs directory for ${project}: ${error.message}`);
-      return;
     }
+  });
+  
+  if (allEntries.length === 0) {
+    return rawData;
+  }
+  
+  // Filter entries by date range
+  const filteredEntries = allEntries.filter(entry => {
+    const entryDate = new Date(entry.date);
+    const entryDateStr = entryDate.toISOString().split('T')[0];
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+    const todayDateStr = today.toISOString().split('T')[0];
     
-    if (allEntries.length === 0) {
-      return;
-    }
+    return entryDateStr >= cutoffDateStr && entryDateStr <= todayDateStr;
+  });
+  
+  if (reportType === 'geekbot') {
+    // Use enhanced categorization for geekbot reports
+    const categories = categorizeEntriesForGeekbot(filteredEntries, USER_ID);
     
-    // Filter entries based on report type
-    let filteredEntries;
-    if (reportType === 'geekbot') {
-      // For Geekbot: only user's LSM entries
-      const lsmEntries = filterLsmEntries(allEntries);
-      const userEntries = lsmEntries.filter(entry => entry.user.id === USER_ID);
-      
-      filteredEntries = userEntries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        
-        // Compare just the date parts (YYYY-MM-DD) to avoid time component issues
-        const entryDateStr = entryDate.toISOString().split('T')[0];
-        const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-        const todayDateStr = today.toISOString().split('T')[0];
-        
-        const result = entryDateStr >= cutoffDateStr && entryDateStr <= todayDateStr;
-        
-        return result;
-      });
-    } else {
-      // For other reports: all LSM entries
-      const lsmEntries = filterLsmEntries(allEntries);
-      filteredEntries = lsmEntries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        
-        // Compare just the date parts (YYYY-MM-DD) to avoid time component issues
-        const entryDateStr = entryDate.toISOString().split('T')[0];
-        const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-        const todayDateStr = today.toISOString().split('T')[0];
-        
-        return entryDateStr >= cutoffDateStr && entryDateStr <= todayDateStr;
-      });
-    }
+    // Generate output in specified order: Projects, LSM, Internal
     
-    if (filteredEntries.length > 0) {
-      rawData += `\n=== ${project} ===\n`;
-      filteredEntries.forEach(entry => {
+    // 1. Client Projects
+    Object.keys(categories.clientProjects).sort().forEach(projectKey => {
+      const entries = categories.clientProjects[projectKey];
+      if (entries.length > 0) {
+        rawData += `\n=== ${projectKey} ===\n`;
+        entries.forEach(entry => {
+          const timeFormatted = formatTime(entry.minutes);
+          const user = `${entry.user.first_name} ${entry.user.last_name.charAt(0)}.`;
+          rawData += `${timeFormatted} - ${user}: ${entry.description} (${entry.date})\n`;
+        });
+      }
+    });
+    
+    // 2. LSM General
+    if (categories.lsm.length > 0) {
+      rawData += `\n=== LSM ===\n`;
+      categories.lsm.forEach(entry => {
         const timeFormatted = formatTime(entry.minutes);
         const user = `${entry.user.first_name} ${entry.user.last_name.charAt(0)}.`;
-        const projectName = entry.project.name.replace(/^\[LSM\]\s*/, ''); // Clean up project name for display
         rawData += `${timeFormatted} - ${user}: ${entry.description} (${entry.date})\n`;
       });
     }
-  });
+    
+    // 3. Internal
+    if (categories.internal.length > 0) {
+      rawData += `\n=== Internal ===\n`;
+      categories.internal.forEach(entry => {
+        const timeFormatted = formatTime(entry.minutes);
+        const user = `${entry.user.first_name} ${entry.user.last_name.charAt(0)}.`;
+        rawData += `${timeFormatted} - ${user}: ${entry.description} (${entry.date})\n`;
+      });
+    }
+    
+    // 4. Other (auto-categorize)
+    if (categories.other.length > 0) {
+      // Group by project name for uncategorized entries
+      const otherGrouped = {};
+      categories.other.forEach(entry => {
+        const projectName = entry.project?.name || 'Uncategorized';
+        if (!otherGrouped[projectName]) {
+          otherGrouped[projectName] = [];
+        }
+        otherGrouped[projectName].push(entry);
+      });
+      
+      Object.keys(otherGrouped).sort().forEach(projectName => {
+        const entries = otherGrouped[projectName];
+        rawData += `\n=== ${projectName} ===\n`;
+        entries.forEach(entry => {
+          const timeFormatted = formatTime(entry.minutes);
+          const user = `${entry.user.first_name} ${entry.user.last_name.charAt(0)}.`;
+          rawData += `${timeFormatted} - ${user}: ${entry.description} (${entry.date})\n`;
+        });
+      });
+    }
+    
+  } else {
+    // For other reports: use original LSM filtering approach
+    const lsmEntries = filterLsmEntries(filteredEntries);
+    const userEntries = lsmEntries.filter(entry => entry.user.id === USER_ID);
+    
+    if (userEntries.length > 0) {
+      // Group by project for non-geekbot reports
+      const projectGroups = {};
+      userEntries.forEach(entry => {
+        const projectName = entry.project?.name?.replace(/^\[LSM\]\s*/, '') || 'Unknown';
+        if (!projectGroups[projectName]) {
+          projectGroups[projectName] = [];
+        }
+        projectGroups[projectName].push(entry);
+      });
+      
+      Object.keys(projectGroups).sort().forEach(projectName => {
+        const entries = projectGroups[projectName];
+        rawData += `\n=== ${projectName} ===\n`;
+        entries.forEach(entry => {
+          const timeFormatted = formatTime(entry.minutes);
+          const user = `${entry.user.first_name} ${entry.user.last_name.charAt(0)}.`;
+          rawData += `${timeFormatted} - ${user}: ${entry.description} (${entry.date})\n`;
+        });
+      });
+    }
+  }
   
   return rawData;
 }
