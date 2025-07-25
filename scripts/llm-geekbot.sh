@@ -107,21 +107,21 @@ No current blockers"
 fi
 
 # Create system prompt for Claude Code
-SYSTEM_PROMPT="When given this log of time tracking entries, organize the entries by project and summarize what has been accomplished. Only pay attention to LSM activities (Internal and Sales activities are already filtered out). Do not summarize the time spent, just focus on a concise list of things accomplished for each project. Remove all hashtags and create clean, professional summaries.
+SYSTEM_PROMPT="When given this log of time tracking entries, organize the entries by project and summarize what has been accomplished. These are LSM (Lullabot Support and Maintenance Department) activities - Internal and Sales activities have been filtered out. Do not summarize the time spent, just focus on a concise list of things accomplished for each project. Remove all hashtags and create clean, professional summaries.
+
+LSM work includes client support and maintenance activities, dependency updates, code reviews, QA tasks, project management, and development work for LSM-managed projects.
 
 Format the output for Geekbot's 3 questions:
 
 **Section 1 (What's new since your last update?):**
-CATIC:
+[Project Name]:
 * [clean summary item]
 * [clean summary item]
 
-SDSU: 
-* [clean summary item]
-* [clean summary item]
+[Additional projects as found in data]
 
 **Section 2 (What will you do today?):**
-Monitor for new issues on both projects and respond
+Monitor for new issues on active projects and respond
 Be available for client communications and urgent requests
 Continue ongoing development and maintenance tasks
 

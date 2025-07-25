@@ -215,6 +215,46 @@ Add context files to `data/ProjectName/memory-bank/`:
 - `progress.md` - Status and next steps
 - `productContext.md` - Project background
 
+### LSM Activity Classification
+
+**LSM** = **Lullabot Support and Maintenance Department**
+
+The system automatically identifies LSM activities using a tiered approach:
+
+#### Primary Identification: Noko Project Names
+- Projects with **`[LSM]`** prefix are automatically classified as LSM activities
+- Example: `[LSM] Georgia Support SON 2025 RETAINER (04404)`
+
+#### Secondary Filtering: Tag-Based Exclusions  
+- Entries tagged with `#internal` or `#sales` are excluded from LSM reports
+- This handles edge cases where LSM work might be logged to other Noko buckets
+
+#### Dynamic Project Discovery
+- Projects are automatically discovered from your `data/` directory structure
+- No need to hardcode project lists - the system adapts to your actual project setup
+- Override with `PROJECTS=Project1,Project2` environment variable if needed
+
+#### LSM Work Examples
+- Client support and maintenance activities
+- Dependency updates and security patches  
+- Code reviews and QA tasks
+- Project management for LSM-managed projects
+- Development work on LSM client projects
+
+#### Edge Cases Handled
+- **Drainpipe work**: LSM team work sometimes logged to non-LSM Noko buckets
+- **Context-dependent classification**: Same activity may be LSM vs Internal depending on who does it and why
+- **Cross-project work**: LSM tools/processes that benefit multiple projects
+
+#### Configuration
+```bash
+# User filtering (reports only show your entries)
+NOKO_USER_ID=your_user_id_here
+
+# Custom project discovery (optional)
+PROJECTS=ProjectA,ProjectB,ProjectC
+```
+
 ## 🛠️ Development
 
 ### Project Structure
