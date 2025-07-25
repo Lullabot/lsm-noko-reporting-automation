@@ -236,10 +236,13 @@ function categorizeEntriesForGeekbot(allEntries, userId) {
 }
 
 // Function to generate raw data for LLM processing
-function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) {
+function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false, excludeInternal = false) {
   if (!quiet) {
     console.log(`📝 Generating raw data for LLM processing (${reportType})...`);
     console.log(`📁 Discovered projects: ${CONFIG.projects.join(', ')}`);
+    if (excludeInternal) {
+      console.log(`🎯 Excluding Internal activities (LSM-only mode)`);
+    }
   }
   
   let rawData = '';
@@ -321,8 +324,8 @@ function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false) 
       });
     }
     
-    // 3. Internal
-    if (categories.internal.length > 0) {
+    // 3. Internal (conditionally included)
+    if (!excludeInternal && categories.internal.length > 0) {
       rawData += `\n=== Internal ===\n`;
       categories.internal.forEach(entry => {
         const timeFormatted = formatTime(entry.minutes);
@@ -392,7 +395,9 @@ function main() {
   
   switch (command) {
     case 'raw-geekbot':
-      const rawGeekbot = generateRawDataForLLM(args[1] ? parseInt(args[1]) : 1, 'geekbot');
+      const rawDays = args[1] ? parseInt(args[1]) : 1;
+      const rawExcludeInternal = args[2] === 'exclude-internal';
+      const rawGeekbot = generateRawDataForLLM(rawDays, 'geekbot', false, rawExcludeInternal);
       console.log('📋 Raw Geekbot Data:');
       console.log('=' .repeat(60));
       console.log(rawGeekbot || 'No entries found');
@@ -413,7 +418,9 @@ function main() {
       break;
       
     case 'clean-geekbot':
-      const cleanGeekbot = generateRawDataForLLM(args[1] ? parseInt(args[1]) : 1, 'geekbot', true);
+      const days = args[1] ? parseInt(args[1]) : 1;
+      const excludeInternal = args[2] === 'exclude-internal';
+      const cleanGeekbot = generateRawDataForLLM(days, 'geekbot', true, excludeInternal);
       console.log(cleanGeekbot || 'No entries found');
       break;
       
@@ -425,14 +432,19 @@ function main() {
   node generate-reports.js <command> [options]
 
 Commands:
-  raw-geekbot [days] Generate raw data for LLM processing (Geekbot, default: 1 day)
-  raw-weekly         Generate raw data for LLM processing (Weekly, 7 days)
-  clean-geekbot      Generate clean data for LLM (Geekbot, no headers)
-  clean-weekly       Generate clean data for LLM (Weekly, no headers)
-  help               Show this help message
+  raw-geekbot [days] [exclude-internal]    Generate raw data for LLM processing (Geekbot, default: 1 day)
+  raw-weekly                               Generate raw data for LLM processing (Weekly, 7 days)
+  clean-geekbot [days] [exclude-internal]  Generate clean data for LLM (Geekbot, no headers)
+  clean-weekly                             Generate clean data for LLM (Weekly, no headers)
+  help                                     Show this help message
+
+Options:
+  exclude-internal     Exclude Internal activities from geekbot reports
+                       (useful for part-time CS/LSM users)
 
 Examples:
   node generate-reports.js raw-geekbot 1
+  node generate-reports.js clean-geekbot 2 exclude-internal
   node generate-reports.js clean-weekly
       `);
       break;

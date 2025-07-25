@@ -23,6 +23,46 @@ fi
 
 echo "🤖 Starting LLM-Powered Geekbot Update..."
 
+# Parse command line arguments
+EXCLUDE_INTERNAL=false
+ARGS_PROCESSED=()
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --exclude-internal|--lsm-only)
+            EXCLUDE_INTERNAL=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: $0 [options]"
+            echo ""
+            echo "Options:"
+            echo "  --exclude-internal, --lsm-only    Exclude Internal activities from report"
+            echo "                                     (useful for part-time CS/LSM users)"
+            echo "  --help, -h                         Show this help message"
+            echo ""
+            echo "Environment Variables:"
+            echo "  GEEKBOT_EXCLUDE_INTERNAL=true     Default to excluding Internal activities"
+            echo "  NOKO_USER_ID=your_user_id          Your Noko user ID for filtering"
+            echo "  NOKO_API_TOKEN=your_token          Your Noko API token"
+            exit 0
+            ;;
+        *)
+            ARGS_PROCESSED+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Check environment variable as fallback
+if [ "${GEEKBOT_EXCLUDE_INTERNAL:-false}" = "true" ]; then
+    EXCLUDE_INTERNAL=true
+fi
+
+if [ "$EXCLUDE_INTERNAL" = "true" ]; then
+    echo "🎯 LSM-only mode: Internal activities will be excluded from report"
+fi
+
 # Find claude executable (handles aliases and different install locations)
 CLAUDE_CMD=""
 if command -v claude &> /dev/null; then
@@ -85,7 +125,11 @@ fi
 
 # Generate raw data for LLM processing
 echo "📝 Generating raw data for LLM..."
-RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-geekbot $DAYS_BACK 2>/dev/null)
+if [ "$EXCLUDE_INTERNAL" = "true" ]; then
+    RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-geekbot $DAYS_BACK exclude-internal 2>/dev/null)
+else
+    RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-geekbot $DAYS_BACK 2>/dev/null)
+fi
 
 # Check if we have data to process
 if [ -z "$RAW_DATA" ] || echo "$RAW_DATA" | grep -q "No entries found"; then
@@ -106,27 +150,60 @@ No current blockers"
     exit 0
 fi
 
-# Create system prompt for Claude Code
-SYSTEM_PROMPT="When given this log of time tracking entries, organize the entries by project and summarize what has been accomplished. These are LSM (Lullabot Support and Maintenance Department) activities - Internal and Sales activities have been filtered out. Do not summarize the time spent, just focus on a concise list of things accomplished for each project. Remove all hashtags and create clean, professional summaries.
+# Create system prompt for Claude Code based on whether Internal is excluded
+if [ "$EXCLUDE_INTERNAL" = "true" ]; then
+    SYSTEM_PROMPT="When given this log of time tracking entries, organize the entries by category and summarize what has been accomplished. The entries are categorized into client projects and general LSM work. Internal activities have been excluded from this report. Do not summarize the time spent, just focus on a concise list of things accomplished. Remove all hashtags and create clean, professional summaries.
 
-LSM work includes client support and maintenance activities, dependency updates, code reviews, QA tasks, project management, and development work for LSM-managed projects.
+Categories explained:
+- Client Projects (DH, GovHub, MJFF, etc.): LSM client work and support
+- LSM: General LSM administrative work, cross-project activities, and LSM infrastructure
 
 Format the output for Geekbot's 3 questions:
 
 **Section 1 (What's new since your last update?):**
-[Project Name]:
+[Client Project Name]:
 * [clean summary item]
 * [clean summary item]
 
-[Additional projects as found in data]
+LSM:
+* [clean summary of general LSM activities]
 
 **Section 2 (What will you do today?):**
-Monitor for new issues on active projects and respond
+Monitor for new issues on active client projects and respond
 Be available for client communications and urgent requests
-Continue ongoing development and maintenance tasks
+Continue ongoing LSM administrative and development tasks
 
 **Section 3 (Anything blocking your progress?):**
 No current blockers"
+else
+    SYSTEM_PROMPT="When given this log of time tracking entries, organize the entries by category and summarize what has been accomplished. The entries are already categorized into client projects, general LSM work, and internal activities. Do not summarize the time spent, just focus on a concise list of things accomplished. Remove all hashtags and create clean, professional summaries.
+
+Categories explained:
+- Client Projects (DH, GovHub, MJFF, etc.): LSM client work and support
+- LSM: General LSM administrative work, cross-project activities, and LSM infrastructure
+- Internal: Company-wide activities, internal tools, and administrative work
+
+Format the output for Geekbot's 3 questions:
+
+**Section 1 (What's new since your last update?):**
+[Client Project Name]:
+* [clean summary item]
+* [clean summary item]
+
+LSM:
+* [clean summary of general LSM activities]
+
+Internal:
+* [clean summary of internal activities]
+
+**Section 2 (What will you do today?):**
+Monitor for new issues on active client projects and respond
+Be available for client communications and urgent requests
+Continue ongoing LSM administrative and development tasks
+
+**Section 3 (Anything blocking your progress?):**
+No current blockers"
+fi
 
 # Use Claude Code CLI with system prompt
 echo "🤖 Processing with Claude Code..."
