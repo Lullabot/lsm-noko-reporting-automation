@@ -1,6 +1,10 @@
 .env
 .env.backup*
 data/
+
+# Temp ignore cursor rules, till know they are good enough to share
+.cursor
+
 # Process baseline temp files
 temp_scratch_*.md
 .cursor/rules-backup-*
