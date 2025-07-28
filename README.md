@@ -215,6 +215,20 @@ Add context files to `data/ProjectName/memory-bank/`:
 - `progress.md` - Status and next steps
 - `productContext.md` - Project background
 
+### LSM Activity Classification
+
+**LSM** = **Lullabot Support and Maintenance Department**
+
+The system automatically identifies LSM activities using dynamic project discovery and intelligent filtering. For comprehensive details on LSM classification logic, edge cases, and troubleshooting, see:
+
+📋 **[LSM Activity Classification Guide](LSM.md)**
+
+**Quick Summary:**
+- **Primary identification**: Noko projects with `[LSM]` prefix
+- **Dynamic discovery**: Projects auto-discovered from `data/` directory  
+- **Flexible filtering**: Handles edge cases and context-dependent classification
+- **User-specific reports**: Configure with `NOKO_USER_ID` environment variable
+
 ## 🛠️ Development
 
 ### Project Structure
