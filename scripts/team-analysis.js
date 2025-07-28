@@ -31,9 +31,18 @@ const CONFIG = {
   dataDir: process.env.DATA_DIR || './data',
   projectName: 'GovHub',
   sowStartDate: '2025-04-01',
+  sowEndDate: '2026-06-30', // 15 month contract
+  sowTotalHours: 3000, // From hours.csv "Current SOW SAL-152"
   sowMonthlyHours: 200, // From SOW Chart 4
   sowHourlyRate: 175,
-  sowMonthlyBudget: 35000
+  sowMonthlyBudget: 35000,
+  // Real usage from hours.csv for context
+  actualUsageFromCSV: {
+    totalHours: 947.75,
+    monthsComplete: 4, // Apr-Jul
+    monthsRemaining: 11,
+    hoursRemaining: 2052.25
+  }
 };
 
 // Utility functions
@@ -213,15 +222,43 @@ function analyzeTeamData(entries) {
     analysis.byMonth[monthKey].workTypes[workType].entries += 1;
   });
   
-  // Capacity analysis
-  const expectedTotalHours = CONFIG.sowMonthlyHours * analysis.summary.monthsAnalyzed;
+  // Capacity analysis - updated for 15-month SOW
+  const sowStart = parseDate(CONFIG.sowStartDate);
+  const sowEnd = parseDate(CONFIG.sowEndDate);
+  const now = new Date();
+  
+  // Calculate months into SOW (more accurate)
+  const monthsIntoSOW = ((now.getFullYear() - sowStart.getFullYear()) * 12 
+    + (now.getMonth() - sowStart.getMonth())) + 1;
+  
+  // Expected hours based on time elapsed
+  const expectedHoursByTime = CONFIG.sowMonthlyHours * monthsIntoSOW;
+  
   analysis.capacity = {
-    expectedHours: expectedTotalHours,
-    actualHours: analysis.summary.totalHours,
-    utilizationRate: (analysis.summary.totalHours / expectedTotalHours * 100).toFixed(1),
-    remainingCapacity: expectedTotalHours - analysis.summary.totalHours,
-    avgMonthlyHours: (analysis.summary.totalHours / analysis.summary.monthsAnalyzed).toFixed(1),
-    expectedMonthlyHours: CONFIG.sowMonthlyHours
+    // SOW Contract Details
+    contractTotalHours: CONFIG.sowTotalHours,
+    contractMonths: 15,
+    contractMonthlyHours: CONFIG.sowMonthlyHours,
+    
+    // Time-based Analysis (from log data - LIMITED)
+    logDataHours: analysis.summary.totalHours,
+    logDataMonths: analysis.summary.monthsAnalyzed,
+    logDataUtilization: (analysis.summary.totalHours / expectedHoursByTime * 100).toFixed(1),
+    
+    // Real Usage (from hours.csv context)
+    actualTotalUsed: CONFIG.actualUsageFromCSV.totalHours,
+    actualMonthsComplete: CONFIG.actualUsageFromCSV.monthsComplete,
+    actualUtilization: (CONFIG.actualUsageFromCSV.totalHours / CONFIG.sowTotalHours * 100).toFixed(1),
+    actualMonthlyAverage: (CONFIG.actualUsageFromCSV.totalHours / CONFIG.actualUsageFromCSV.monthsComplete).toFixed(1),
+    
+    // Projections
+    hoursRemaining: CONFIG.actualUsageFromCSV.hoursRemaining,
+    monthsRemaining: CONFIG.actualUsageFromCSV.monthsRemaining,
+    avgHoursNeededPerMonth: (CONFIG.actualUsageFromCSV.hoursRemaining / CONFIG.actualUsageFromCSV.monthsRemaining).toFixed(1),
+    
+    // Capacity Status
+    onTrackForSOW: CONFIG.actualUsageFromCSV.totalHours / CONFIG.actualUsageFromCSV.monthsComplete <= CONFIG.sowMonthlyHours,
+    capacityStatus: CONFIG.actualUsageFromCSV.totalHours < (CONFIG.actualUsageFromCSV.monthsComplete * CONFIG.sowMonthlyHours) ? 'under' : 'over'
   };
   
   return analysis;
@@ -234,24 +271,32 @@ function generateSummaryReport(analysis) {
   report.push('# GovHub Team Resource Analysis Summary');
   report.push('*Generated for SOW planning and client meetings*\n');
   
-  // Key Metrics
+  // Key Metrics - Updated for accuracy
   report.push('## 📊 Key Metrics');
   report.push(`- **Analysis Period**: ${analysis.summary.dateRange.start} to ${analysis.summary.dateRange.end}`);
-  report.push(`- **Months Analyzed**: ${analysis.summary.monthsAnalyzed}`);
-  report.push(`- **Total Hours Used**: ${analysis.summary.totalHours.toFixed(1)} hours`);
-  report.push(`- **SOW Utilization**: ${analysis.capacity.utilizationRate}% of contracted capacity`);
-  report.push(`- **Remaining Capacity**: ${analysis.capacity.remainingCapacity.toFixed(1)} hours\n`);
+  report.push(`- **SOW Contract**: 15 months, 3000 hours total`);
+  report.push(`- **Actual Usage (from hours.csv)**: ${analysis.capacity.actualTotalUsed} hours (${analysis.capacity.actualUtilization}% of contract)`);
+  report.push(`- **Log Data Available**: ${analysis.summary.totalHours.toFixed(1)} hours (limited recent data)`);
+  report.push(`- **Months Remaining**: ${analysis.capacity.monthsRemaining} months`);
+  report.push(`- **Hours Remaining**: ${analysis.capacity.hoursRemaining} hours\n`);
   
-  // Capacity Analysis
-  report.push('## 🎯 SOW Capacity Analysis');
-  report.push(`- **Expected Hours/Month**: ${CONFIG.sowMonthlyHours} hours`);
-  report.push(`- **Actual Average/Month**: ${analysis.capacity.avgMonthlyHours} hours`);
-  report.push(`- **Under-utilization**: ${(CONFIG.sowMonthlyHours - parseFloat(analysis.capacity.avgMonthlyHours)).toFixed(1)} hours/month`);
+  // Capacity Analysis - Corrected
+  report.push('## 🎯 SOW Capacity Analysis (Based on hours.csv Reality)');
+  report.push(`- **Contracted Hours/Month**: ${CONFIG.sowMonthlyHours} hours`);
+  report.push(`- **Actual Average/Month**: ${analysis.capacity.actualMonthlyAverage} hours`);
+  report.push(`- **Hours Needed/Month (remaining)**: ${analysis.capacity.avgHoursNeededPerMonth} hours`);
+  report.push(`- **Current Pace**: ${analysis.capacity.capacityStatus === 'under' ? 'Slightly under' : 'At/over'} SOW monthly target`);
   
-  if (parseFloat(analysis.capacity.utilizationRate) < 100) {
-    report.push('\n💡 **Key Finding**: Team is operating below SOW capacity - room for growth without additional resources.');
+  // Updated recommendations based on real data
+  const utilizationRate = parseFloat(analysis.capacity.actualUtilization);
+  const monthlyNeeded = parseFloat(analysis.capacity.avgHoursNeededPerMonth);
+  
+  if (monthlyNeeded <= CONFIG.sowMonthlyHours * 0.9) {
+    report.push('\n💡 **Key Finding**: Room for modest growth - can accommodate some new initiatives within SOW.');
+  } else if (monthlyNeeded <= CONFIG.sowMonthlyHours) {
+    report.push('\n⚖️ **Key Finding**: Operating near SOW capacity - need careful prioritization for new initiatives.');
   } else {
-    report.push('\n⚠️ **Key Finding**: Team is at or above SOW capacity - may need additional resources for new initiatives.');
+    report.push('\n⚠️ **Key Finding**: Would exceed SOW monthly capacity - may need resource strategy adjustments.');
   }
   report.push('');
   
@@ -281,22 +326,28 @@ function generateSummaryReport(analysis) {
   });
   report.push('');
   
-  // Recommendations
+  // Recommendations - Updated for realistic capacity
   report.push('## 🎯 Recommendations for JE Meeting');
   
-  if (parseFloat(analysis.capacity.utilizationRate) < 80) {
-    report.push('1. **Scale Current Team**: Under-utilizing SOW capacity - can increase current team hours');
-    report.push('2. **Accommodate Initiatives**: Room for new initiatives within existing contract');
-    report.push('3. **No Additional CS Resources Needed**: Current maintenance team can handle expanded scope');
-  } else if (parseFloat(analysis.capacity.utilizationRate) < 100) {
-    report.push('1. **Optimize Current Resources**: Approaching SOW limits but still have capacity');
-    report.push('2. **Selective Initiative Prioritization**: Can handle some new initiatives');
-    report.push('3. **Monitor Capacity**: May need CS resources for significant scope expansion');
+  const monthlyNeeded = parseFloat(analysis.capacity.avgHoursNeededPerMonth);
+  const currentMonthly = parseFloat(analysis.capacity.actualMonthlyAverage);
+  
+  if (monthlyNeeded <= CONFIG.sowMonthlyHours * 0.85) {
+    report.push('1. **Moderate Capacity Available**: Can accommodate select new initiatives');
+    report.push('2. **Prioritize Initiatives**: Choose highest-value professional services work');
+    report.push('3. **Scale Gradually**: Increase team utilization within SOW limits');
+  } else if (monthlyNeeded <= CONFIG.sowMonthlyHours * 0.95) {
+    report.push('1. **Limited Additional Capacity**: Approaching SOW monthly limits');
+    report.push('2. **Strategic Initiative Selection**: Focus on initiatives already in Professional Services scope');
+    report.push('3. **Consider Trade-offs**: May need to reduce some maintenance scope for major initiatives');
   } else {
-    report.push('1. **Consider Client Services Resources**: At/above SOW capacity');
-    report.push('2. **Reduce Maintenance Hours**: To accommodate new initiatives within budget');
-    report.push('3. **SOW Amendment**: May need additional budget for expanded scope');
+    report.push('1. **At SOW Capacity**: Additional initiatives may require resource adjustments');
+    report.push('2. **Client Services Option**: Consider CS resources for specialized initiatives');
+    report.push('3. **SOW Discussion**: May need to discuss scope adjustments with customer');
   }
+  
+  // Add context about data limitations
+  report.push('\n**📝 Note**: This analysis uses hours.csv data (947.75h actual) as log data only covers recent period.');
   
   return report.join('\n');
 }
