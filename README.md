@@ -10,6 +10,7 @@ Automated reporting tools for Noko time tracking with LLM-powered processing. Th
 - **🌍 Cross-Platform**: Works on macOS, Linux, and Windows
 - **📱 Smart Clipboard**: Automatic clipboard integration (configurable)
 - **🎯 Multiple Report Formats**: Daily updates and weekly summaries
+- **👥 Team Analysis**: Comprehensive team resource utilization analysis for SOW planning
 - **⚙️ Flexible Configuration**: Environment-based setup for any team
 
 ## 🚀 Quick Start
@@ -71,6 +72,9 @@ npm run llm-geekbot
 
 # Test weekly reports  
 npm run llm-weekly
+
+# Test team analysis
+npm run team-summary
 ```
 
 ## 📋 Usage
@@ -110,6 +114,41 @@ npm run llm-weekly
 - Detailed weekly project summaries
 - Accomplishments and next steps
 
+### Team Analysis & SOW Planning
+
+Analyze team-wide resource utilization for SOW planning and client meetings:
+
+```bash
+# Summary report (perfect for meetings)
+npm run team-summary
+
+# Detailed breakdown report
+npm run team-detailed
+
+# Both summary and detailed reports
+npm run team-both
+```
+
+**Team Analysis Features:**
+- Team member resource utilization breakdown
+- Support & Maintenance vs Professional Services categorization
+- SOW capacity analysis and recommendations
+- Monthly trending and historical analysis
+- Identifies under/over-utilization patterns
+
+**Example Output:**
+```
+## 📊 Key Metrics
+- Total Hours Used: 93.0 hours
+- SOW Utilization: 9.3% of contracted capacity
+- Remaining Capacity: 907.0 hours
+
+## 🎯 Recommendations for Client Meetings
+1. Scale Current Team: Under-utilizing SOW capacity
+2. Accommodate Initiatives: Room for new initiatives within existing contract
+3. No Additional CS Resources Needed: Current team can handle expanded scope
+```
+
 ### Manual Data Operations
 
 ```bash
@@ -122,6 +161,10 @@ npm run fetch-daily
 # Generate raw data for custom processing
 node scripts/generate-reports.js raw-weekly
 node scripts/generate-reports.js clean-geekbot
+
+# Custom team analysis date ranges
+node scripts/team-analysis.js summary 2025-04-01 2025-07-31
+node scripts/team-analysis.js detailed 2025-06-01
 ```
 
 ## ⚙️ Configuration
@@ -215,6 +258,20 @@ Add context files to `data/ProjectName/memory-bank/`:
 - `progress.md` - Status and next steps
 - `productContext.md` - Project background
 
+### Team Analysis Configuration
+
+The team analysis tool automatically categorizes work as:
+
+**Support & Maintenance:**
+- `#maintenance` tagged entries
+- Core/module updates, security patches
+- Bug fixes and routine maintenance
+
+**Professional Services:**
+- `#professional` tagged entries
+- Initiative keywords: behat, playwright, migration, upgrade, drupal 11, govhub 2.0, acn, cloud next, storybook, orchard, auth0, siteimprove, figma
+- Strategic consulting and feature development
+
 ### LSM Activity Classification
 
 **LSM** = **Lullabot Support and Maintenance Department**
@@ -240,6 +297,7 @@ lsm-noko-reporting-automation/
 │   ├── generate-reports.js # Report data processing
 │   ├── llm-geekbot.sh     # Daily update automation
 │   ├── llm-weekly.sh      # Weekly report automation
+│   ├── team-analysis.js   # Team resource analysis
 │   └── setup-env.sh       # Interactive setup
 ├── package.json           # NPM scripts and metadata
 ├── .env.example          # Configuration template
@@ -254,6 +312,11 @@ npm run llm-geekbot    # Generate daily reports
 npm run llm-weekly     # Generate weekly reports  
 npm run fetch          # Fetch 7 days of data
 npm run fetch-daily    # Fetch 1 day of data
+
+# Team Analysis
+npm run team-summary   # Summary report for meetings
+npm run team-detailed  # Detailed team breakdown
+npm run team-both      # Both summary and detailed reports
 ```
 
 ### Script API
@@ -263,6 +326,11 @@ npm run fetch-daily    # Fetch 1 day of data
 ./scripts/fetch-noko.sh ProjectName 7 json
 node scripts/generate-reports.js raw-weekly
 ./scripts/llm-geekbot.sh
+
+# Team analysis with custom date ranges
+node scripts/team-analysis.js summary 2025-04-01
+node scripts/team-analysis.js detailed 2025-06-01 2025-07-31
+node scripts/team-analysis.js json  # Raw JSON output
 ```
 
 ## 🚨 Troubleshooting
@@ -295,6 +363,11 @@ node scripts/generate-reports.js raw-weekly
 - Install clipboard utility for your platform
 - Or set `CLIPBOARD_ENABLED=false`
 
+**Team analysis shows low utilization**
+- Fetch more historical data: `npm run fetch`
+- Check if all team members are logging to correct project
+- Verify project ID configuration
+
 ### Dependency Issues
 
 **Missing `jq`:**
@@ -325,6 +398,9 @@ curl -H "X-NokoToken: $NOKO_API_TOKEN" https://api.nokotime.com/v2/current_user
 
 # Test Claude Code CLI
 claude --version
+
+# Test team analysis
+npm run team-summary
 ```
 
 ## 📝 License

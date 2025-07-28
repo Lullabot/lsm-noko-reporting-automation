@@ -1,0 +1,208 @@
+STATEMENT OF WORK # PR-20240826-698 
+to Master Services Agreement GovHub & Orchard Support, Maintenance and Professional  Services (Contract # 98000-eRFP-0612025-LUL)  
+Event: GovHub & Orchard Support, Maintenance and Professional Services  Event Number: GTA-98000-eRFP-0612025  
+This Statement of Work # PR-20240826-698 (“SOW PR-20240826-698”) is made this 1st day of April,  2025 (the “SOW Effective Date”), by and between the GEORGIA TECHNOLOGY AUTHORITY  (“GTA”) and LULLABOT, INC. ( “Contractor”).  
+All defined terms used in this SOW# PR-20240826-698 but not otherwise defined herein shall have the  meanings assigned to them in the Agreement. This SOW# PR-20240826-698 is for Services to be provided  to GTA or GTA Customer. GTA and Contractor are each individually a “Party” and collectively referred  to as “Parties”. 
+WHEREAS, pursuant to O.C.G.A 502-21.1 et seq, GTA may procure and execute contracts for services  where necessary or convenient to exercise the powers of authority for the furtherance of the purposes for  which GTA was created;  
+WHEREAS, GTA entered into Master Services Agreement, 98000-eRFP-0612025-LUL dated April 1,  2025 (the “Agreement”) to provide the Services under the governance and terms of the Agreement;  
+WHEREAS, GTA offers professional services engagements to help agencies with information technology  (IT) projects from time to time as may be requested by agencies and for which they might need additional  staff and/or skills; and  
+WHEREAS, the terms and conditions of this SOW# PR-20240826-698 are applicable to the Services and  Deliverables undertaken pursuant to this SOW# PR-20240826-698 only and unless otherwise indicated  shall not apply to any other Services or Deliverables under any other SOW to the Agreement.  
+NOW, THEREFORE, in consideration of the promises, the terms and conditions stated herein, and other  good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the Parties  hereby agree as follows: 
+1. Scope of Services 
+Contractor shall augment GTA’s product development team (“DSGa”) by providing support for regularly  scheduled code releases, Drupal core and contrib module updates, security updates, identifying and  resolving product defects, and feature enhancement consulting for the GovHub website publishing  platform. In addition, Contractor must provide technical support for Orchard, the state of Georgia’s (the  “State”) Storybook-based website design system. Contractor shall assist GTA in continuing to steer the  GovHub and Orchard development roadmaps toward innovative solutions and features through utilization  of the latest technology available to the government sector. DSGa shall maintain product ownership of  GovHub and Orchard.  
+68 
+GTA/Lullabot 
+April 1, 2025 
+Docusign Envelope ID: A52E5BC3-A80D-464A-B75A-47869A7374C3
+2. Deliverables 
+a. Support and Maintenance 
+Chart 2.a  
+DELIVERABLES 
+DESCRIPTION
+Basic and Critical Maintenance  Tasks
+• Perform core updates 
+• Custom and contributed module updates 
+• Npm package updates 
+• Front-end developer 
+• Back-end Developer 
+• Quality Assurance Engineer
+
+
+
+
+Security Updates 
+• Proactively apply security updates for core and contributed  projects 
+• Manage urgent releases when necessary
+
+
+
+
+Defect Resolution 
+• Resolving both front-end and back-end defects in functionality
+
+
+
+
+Emergency and Overnight Code  Releases
+• Accommodate emergency and regularly scheduled overnight code  releases within a defined two-week Sprint (defined below)  schedule
+
+
+
+
+Documentation 
+• Document new solutions and maintain/extend existing  documentation for updates
+
+
+
+
+Automated Testing Coverage 
+• Bolster automated testing coverage by expanding and maintaining  a Playwright automated testing suite
+
+
+
+
+Distribution of Hours 
+• Flexible in distributing hours among maintenance, security tasks,  and bugs/feature work according to Sprint priorities
+
+
+
+
+Process 
+• Work in an Agile methodology and participate in regular backlog  refinement, Sprint planning, demos, and retrospectives as  appropriate to the Sprint’s goal. The Agile methodology is a  project management and software development approach that  focuses on iterative development, flexibility, and customer  collaboration. Agile breaks work into small, manageable  increments (Sprints) to quickly respond to changes. 
+
+
+
+
+Tools 
+Use the following tools: 
+• Bitbucket, Circle CI, DDEV, Acquia development tools, and  Tugboat. 
+• DSGa shall provide project management using JIRA for Agile  product development, Confluence for process and technical  documentation, and Slack channels for rapid feedback and  asynchronous collaboration
+
+
+
+69 
+GTA/Lullabot 
+April 1, 2025 
+Docusign Envelope ID: A52E5BC3-A80D-464A-B75A-47869A7374C3
+b. Professional Services 
+Chart 2.b  
+DELIVERABLES 
+DESCRIPTION
+Feature and Best Practice  
+Consulting 
+● provide feature and best practice consulting, based on  business issues and use cases.
+Technical Strategy and  
+Approach 
+• Inputs from DSGa shall include business problems, use  cases, or interests, while the outputs from the development  partner should include the technical strategy and approach,  including impacts and levels of effort
+Centralized User Management  Module 
+• Assist in scaling and maintaining a centralized user  management module for GovHub users using Auth0 and  Drupal user management
+Email Notification Feature 
+• Assist in scaling and maintaining an email notification  feature for GovHub content editors using existing data 
+3rd-Party Tool Integration 
+• Assist in integrating the 3rd-party tools SiteImprove and  Acquia Cloud Next 
+Drupal 10 to Drupal 11 Upgrade 
+• Lead efforts to upgrade from Drupal 10 to Drupal 11
+Development of Storybook  Components 
+• Lead development of Storybook components and features for the Orchard Design System
+UI/UX Design Services 
+• Have access to staff who can provide UI/UX design  services, specifically using Figma
+Professional Services  
+Consulting Leadership 
+• One individual is expected to spearhead the Professional  Services consulting for the duration of the project, serving  as the primary point of contact 
+Process 
+• DSGa and respondent meet regularly for refinement  sessions to describe use cases, deep-dive into requirements,  discuss possible approaches. Outputs to be documented by  the respondent into tickets or requirements specifications as  appropriate per issue. DSGa anticipates providing a  ticketing system in JIRA for collaboration with team  members, and Slack channels for more rapid feedback 
+
+
+
+70 
+GTA/Lullabot 
+April 1, 2025 
+Docusign Envelope ID: A52E5BC3-A80D-464A-B75A-47869A7374C3
+3. Intentionally omitted 
+4. Contractor Personnel 
+Project Manager/Coordinator 
+Chart 4  
+Labor Categories 
+Hourly  
+Rates
+Total Hours  (Monthly)
+Total Monthly  Cost
+Total Annual  Cost
+Project Manager 
+$175.00 
+40 
+$7,000.00 
+$84,000.00
+Lead Engineer (Backend) 
+$175.00 
+10 
+$1,750.00 
+$21,000.00
+Engineer (Backend) 
+$175.00 
+55 
+$9,625.00 
+$115,500.00
+Quality Assurance Engineer 
+$175.00 
+40 
+$7,000.00 
+$84,000.00
+Front End Developer 
+$175.00 
+55 
+$9,625.00 
+$115,500.00
+
+
+Totals 
+200 
+$35,000.00 
+$420,000.00
+
+
+
+5. Testing Procedures and Requirements 
+Contractor shall follow a comprehensive testing protocol to ensure the stability, functionality, and security  of GovHub and Orchard, including but not limited to: 
+a. Unit Testing: Each new feature and update shall undergo unit testing to validate individual  components.  
+b. Functional Testing: Ensure all CMS features function as intended in accordance with  specifications. 
+c. Regression Testing: Build and maintain automated regression testing suites to ensure that new  features do not break existing functionality.  
+d. Cross-Browser/Device Testing: Ensuring compatibility across agreed-upon browsers and devices. 6. Implementation Plan (Including Key Deliverables) 
+71 
+GTA/Lullabot 
+April 1, 2025 
+Docusign Envelope ID: A52E5BC3-A80D-464A-B75A-47869A7374C3
+Contractor shall follow an Agile development methodology, with iterative cycles and close collaboration  with GTA. The plan shall be broken down into Sprints, each delivering functional increments of GovHub  and Orchard. The high-level outline of the implementation is as follows: 
+a. Sprint Planning: At the start of each Sprint, a planning session shall be held to determine the tasks  and features to be developed and prioritized based on GTA input and business value.  
+b. Sprint Cycles: Development shall occur in two (2) week Sprints, each Sprint shall include the  following phases:  
+i. Development: Design and coding of the prioritized features or enhancements.  
+ii. Peer Review: For each task in a Sprint, peer review exercises must be performed on the  code to the standards established and agreed upon by the Contractor and GTA at the start  of the engagement. Once established, the standards shall be published and accessible to all Parties. Each feature to be added to the master code base must be approved by GTA to be  considered an approved Deliverable. 
+iii. Testing: Each feature shall be tested within the Sprint, adhering to the testing procedures  detailed in Section 5 above.  
+c. Deliverables for Each Sprint: Each Sprint shall produce a functional increment that can be tested  and reviewed by GTA. Deliverables shall include:  
+i. Working feature enhancements 
+ii. Routine and critical maintenance tasks 
+iii. Unit, functional and automated test script creation 
+iv. Documentation of changes and updates  
+7. Backlog Refinement: During each Sprint, the backlog shall be revisited with the Contractor and  reprioritized based on progress, new insights, or changes in requirements.  
+a. Continuous Feedback Loop: GTA and Contractor’s involvement is crucial during Sprint reviews,  allowing for adjustments to priorities and ensuring that the final product aligns with evolving  business needs. 
+This Agile approach allows for flexibility, enabling changes in scope or priorities to be incorporated during  the development process without impacting overall timelines. Each Sprint shall be considered complete  upon GTA approval of the delivered features. 
+8. Acceptance Criteria  
+Acceptance of Deliverables shall occur before a feature or task is accepted into each Sprint, with a  focus on iterative feedback and continuous improvement. The criteria for accepting each Sprint’s  work are as follows: 
+a. Definition of Done (“DoD”): For each feature or task, completion is based on meeting the agreed upon Definition of Done. This includes:  
+72 
+GTA/Lullabot 
+April 1, 2025 
+Docusign Envelope ID: A52E5BC3-A80D-464A-B75A-47869A7374C3
+i. The feature is fully developed and meets the user story’s acceptance criteria. 
+ii. All unit, functional, and integration tests are passed.  
+iii. Code is peer-reviewed and merged into the main code base without critical issues. 
+iv. Relevant documentation is updated (technical and/or user-facing documentation).  
+b. User Story Acceptance: Each user story shall be considered accepted when: 
+i. The user story’s acceptance criteria, as outlined in the backlog, are fully met. 
+ii. GTA has reviewed the functionality during the peer review and approved it for production  or further iteration. 
+c. Continuous Feedback Integration: If issues are identified during the Sprint review  or testing phases, they shall be prioritized and added to the backlog for inclusion in the next Sprint  or subsequent iterations. 
+9. Ongoing Support Requirements 
+Contractor shall deliver ongoing support for GovHub and Orchard, including:  
+a. Routine Maintenance: Monthly updates to Drupal core, contributed modules, and security patches  for GovHub. Storybook, Node, and security related updates for Orchard.  
+b. Security: Immediate attention to security vulnerabilities, with critical issues addressed within  twenty-four (24) hours. 
+c. Support Team: Dedicated support and maintenance resources with a response time of four (4)  hours for urgent issues and twenty-four (24) hours for non-critical issues. Support shall be  provided during standard business hours, 8:00am – 5:00pm, Monday through Friday.  
