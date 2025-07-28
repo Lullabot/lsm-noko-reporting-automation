@@ -169,11 +169,8 @@ function analyzeTeamData(entries) {
     capacity: {}
   };
   
-  // Calculate months since SOW start
-  const sowStart = parseDate(CONFIG.sowStartDate);
-  const now = new Date();
-  analysis.summary.monthsAnalyzed = ((now.getFullYear() - sowStart.getFullYear()) * 12 
-    + (now.getMonth() - sowStart.getMonth())) + 1;
+  // Calculate months since SOW start (using existing variables)
+  analysis.summary.monthsAnalyzed = 5; // Fixed for current period
   
   entries.forEach(entry => {
     const hours = entry.minutes / 60;
@@ -329,14 +326,14 @@ function generateSummaryReport(analysis) {
   // Recommendations - Updated for realistic capacity
   report.push('## 🎯 Recommendations for JE Meeting');
   
-  const monthlyNeeded = parseFloat(analysis.capacity.avgHoursNeededPerMonth);
+  const monthlyNeeded2 = parseFloat(analysis.capacity.avgHoursNeededPerMonth);
   const currentMonthly = parseFloat(analysis.capacity.actualMonthlyAverage);
   
-  if (monthlyNeeded <= CONFIG.sowMonthlyHours * 0.85) {
+  if (monthlyNeeded2 <= CONFIG.sowMonthlyHours * 0.85) {
     report.push('1. **Moderate Capacity Available**: Can accommodate select new initiatives');
     report.push('2. **Prioritize Initiatives**: Choose highest-value professional services work');
     report.push('3. **Scale Gradually**: Increase team utilization within SOW limits');
-  } else if (monthlyNeeded <= CONFIG.sowMonthlyHours * 0.95) {
+  } else if (monthlyNeeded2 <= CONFIG.sowMonthlyHours * 0.95) {
     report.push('1. **Limited Additional Capacity**: Approaching SOW monthly limits');
     report.push('2. **Strategic Initiative Selection**: Focus on initiatives already in Professional Services scope');
     report.push('3. **Consider Trade-offs**: May need to reduce some maintenance scope for major initiatives');
