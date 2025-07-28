@@ -8,7 +8,11 @@
     "llm-geekbot": "./scripts/llm-geekbot.sh",
     "llm-weekly": "./scripts/llm-weekly.sh",
     "fetch": "./scripts/fetch-noko.sh both 7 json",
-    "fetch-daily": "./scripts/fetch-noko.sh both 1 json"
+    "fetch-daily": "./scripts/fetch-noko.sh both 1 json",
+    "team-analysis": "node scripts/team-analysis.js",
+    "team-summary": "node scripts/team-analysis.js summary",
+    "team-detailed": "node scripts/team-analysis.js detailed",
+    "team-both": "node scripts/team-analysis.js both"
   },
   "keywords": [
     "reporting",
