@@ -208,12 +208,80 @@ fi
 # Use Claude Code CLI with system prompt
 echo "🤖 Processing with Claude Code..."
 
-# Save data to temp file to avoid pipe issues with -p flag
-TEMP_FILE="/tmp/geekbot-data-$$.txt"
-echo "$RAW_DATA" > "$TEMP_FILE"
+# Simplify the prompt to avoid issues
+SIMPLE_PROMPT="Format the following time tracking entries for a Geekbot update. Remove hashtags and organize by project:
 
-RESULT=$("$CLAUDE_CMD" --system-prompt "$SYSTEM_PROMPT" < "$TEMP_FILE" 2>&1)
-rm -f "$TEMP_FILE"
+$RAW_DATA
+
+Format as:
+**Section 1 (What's new since your last update?):**
+[List activities by project]
+
+**Section 2 (What will you do today?):**
+Monitor projects and respond to issues
+
+**Section 3 (Anything blocking your progress?):**
+No current blockers"
+
+# Use Claude with simplified prompt (with timeout to prevent hanging)
+echo "🔄 Processing data with Claude Code..."
+
+# Try to run Claude with a timeout using a background process
+TEMP_OUTPUT="/tmp/claude-output-$$.txt"
+(
+    "$CLAUDE_CMD" -p "$SIMPLE_PROMPT" > "$TEMP_OUTPUT" 2>&1
+) &
+CLAUDE_PID=$!
+
+# Wait for up to 10 seconds for Claude
+TIMEOUT=10
+COUNT=0
+while [ $COUNT -lt $TIMEOUT ]; do
+    if ! kill -0 $CLAUDE_PID 2>/dev/null; then
+        # Process finished
+        wait $CLAUDE_PID
+        RESULT=$(cat "$TEMP_OUTPUT" 2>/dev/null || echo "")
+        rm -f "$TEMP_OUTPUT"
+        break
+    fi
+    sleep 1
+    COUNT=$((COUNT + 1))
+done
+
+# If still running after timeout, kill it and try Gemini as fallback
+if kill -0 $CLAUDE_PID 2>/dev/null; then
+    echo "⚠️  Claude CLI appears to be hanging. Trying Gemini as fallback..."
+    kill $CLAUDE_PID 2>/dev/null
+    rm -f "$TEMP_OUTPUT"
+    
+    # Check if Gemini is available
+    if command -v gemini &> /dev/null; then
+        echo "🔄 Processing with Gemini..."
+        
+        # Create Gemini-specific prompt
+        GEMINI_PROMPT="Format the following time tracking entries for a Geekbot update. Remove hashtags and organize by project.
+
+Format the output exactly like this:
+**Section 1 (What's new since your last update?):**
+[List activities by project name]
+- CATIC: [activities]
+- SDState.edu: [activities]
+
+**Section 2 (What will you do today?):**
+Monitor for new issues on both projects and respond
+Be available for client communications and urgent requests
+Continue ongoing development and maintenance tasks
+
+**Section 3 (Anything blocking your progress?):**
+No current blockers"
+        
+        # Use Gemini with piped input
+        RESULT=$(echo "$RAW_DATA" | gemini -p "$GEMINI_PROMPT" -y 2>/dev/null || echo "")
+    else
+        echo "⚠️  Gemini CLI not found. Install with: npm install -g @gemini-ai/cli"
+        RESULT=""
+    fi
+fi
 
 if [ $? -eq 0 ] && [ -n "$RESULT" ]; then
     copy_to_clipboard "$RESULT"

@@ -6,6 +6,7 @@ Automated reporting tools for Noko time tracking with LLM-powered processing. Th
 
 - **🔄 Automated Data Fetching**: Direct integration with Noko API
 - **🤖 LLM-Powered Processing**: Clean, professional report generation via Claude Code CLI
+- **🔁 Automatic Fallback**: Seamless Gemini CLI fallback when Claude encounters issues
 - **📋 Multiple Project Support**: Configure any number of projects dynamically
 - **🌍 Cross-Platform**: Works on macOS, Linux, and Windows
 - **📱 Smart Clipboard**: Automatic clipboard integration (configurable)
@@ -34,16 +35,21 @@ sudo apt-get install curl jq nodejs
 # Install WSL and follow Linux instructions
 ```
 
-### 2. Install Claude Code CLI
+### 2. Install LLM CLI Tools
 
 ```bash
+# Install Claude Code CLI (primary)
 npm install -g @anthropic-ai/claude-code
 
-# Verify installation
+# Install Gemini CLI (fallback)
+npm install -g @google/gemini-cli
+
+# Verify installations
 claude --version
+gemini --version
 ```
 
-**Note:** Claude Code CLI is required for the LLM-powered report generation features.
+**Note:** Claude Code CLI is the primary tool for LLM-powered report generation. Gemini CLI serves as an automatic fallback if Claude encounters issues.
 
 ### 3. Interactive Setup
 
@@ -276,6 +282,11 @@ node scripts/generate-reports.js raw-weekly
 **"claude command not found"**
 - Install: `npm install -g @anthropic-ai/claude-code`
 - Verify: `claude --version`
+
+**Claude CLI hanging with -p flag**
+- This is a known issue with Claude CLI v1.0.86
+- The script automatically falls back to Gemini CLI after 10 seconds
+- Install Gemini for seamless fallback: `npm install -g @gemini-ai/cli`
 
 **"No entries found"**
 - Check Noko API token validity
