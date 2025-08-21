@@ -1,6 +1,7 @@
 .env
 .env.backup*
 data/
+node_modules/
 
 # Temp ignore cursor rules, till know they are good enough to share
 .cursor
