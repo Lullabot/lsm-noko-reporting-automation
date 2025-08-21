@@ -208,7 +208,12 @@ fi
 # Use Claude Code CLI with system prompt
 echo "🤖 Processing with Claude Code..."
 
-RESULT=$(echo "$RAW_DATA" | "$CLAUDE_CMD" --system-prompt "$SYSTEM_PROMPT" -p 2>&1)
+# Save data to temp file to avoid pipe issues with -p flag
+TEMP_FILE="/tmp/geekbot-data-$$.txt"
+echo "$RAW_DATA" > "$TEMP_FILE"
+
+RESULT=$("$CLAUDE_CMD" --system-prompt "$SYSTEM_PROMPT" < "$TEMP_FILE" 2>&1)
+rm -f "$TEMP_FILE"
 
 if [ $? -eq 0 ] && [ -n "$RESULT" ]; then
     copy_to_clipboard "$RESULT"
