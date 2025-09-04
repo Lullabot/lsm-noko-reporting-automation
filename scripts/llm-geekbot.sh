@@ -209,13 +209,13 @@ fi
 echo "🤖 Processing with Claude Code..."
 
 # Simplify the prompt to avoid issues
-SIMPLE_PROMPT="Format the following time tracking entries for a Geekbot update. Remove hashtags and organize by project:
+SIMPLE_PROMPT="Format the following time tracking entries for a Geekbot update. Remove hashtags, remove all time information (like 15m, 1h 45m, etc.), and organize by project:
 
 $RAW_DATA
 
 Format as:
 **Section 1 (What's new since your last update?):**
-[List activities by project]
+[List activities by project - exclude all time durations]
 
 **Section 2 (What will you do today?):**
 Monitor projects and respond to issues
