@@ -264,8 +264,8 @@ if kill -0 $CLAUDE_PID 2>/dev/null; then
 Format the output exactly like this:
 **Section 1 (What's new since your last update?):**
 [List activities by project name]
-- CATIC: [activities]
-- SDState.edu: [activities]
+- ProjectName: [activities]
+- AnotherProject: [activities]
 
 **Section 2 (What will you do today?):**
 Monitor for new issues on both projects and respond

@@ -44,6 +44,9 @@ function getConfig() {
     console.warn(`⚠️  No project directories found in ${dataDir}, using: ${projects.join(', ')}`);
   }
   
+  // Project mapping configuration - maps discovered projects to report categories
+  const projectMappings = parseProjectMappings();
+  
   // Special bucket project IDs for LSM and Internal categorization
   const specialBuckets = {
     lsm: '560795',        // Main LSM Noko bucket
@@ -55,7 +58,53 @@ function getConfig() {
   return {
     dataDir,
     projects,
+    projectMappings,
     specialBuckets
+  };
+}
+
+/**
+ * Parse project mapping configuration from environment variables
+ * 
+ * Project mappings allow mapping discovered project directories to report categories.
+ * This enables flexible reporting structures for different organizational setups.
+ * 
+ * Environment variable format:
+ * PROJECT_MAPPINGS="DH:CATIC,GovHub:CATIC,MJFF:SDSU,LSM:General"
+ * 
+ * This would map:
+ * - DH and GovHub projects → CATIC category
+ * - MJFF projects → SDSU category  
+ * - LSM projects → General category
+ * 
+ * @returns {Object} Mapping object with category names as keys and project arrays as values
+ */
+function parseProjectMappings() {
+  const mappingStr = process.env.PROJECT_MAPPINGS || '';
+  const projectToCategory = {};
+  const categoryToProjects = {};
+  
+  if (mappingStr) {
+    // Parse "DH:CATIC,GovHub:CATIC,MJFF:SDSU" format
+    const pairs = mappingStr.split(',').map(pair => pair.trim());
+    
+    for (const pair of pairs) {
+      const [project, category] = pair.split(':').map(s => s.trim());
+      if (project && category) {
+        projectToCategory[project] = category;
+        
+        if (!categoryToProjects[category]) {
+          categoryToProjects[category] = [];
+        }
+        categoryToProjects[category].push(project);
+      }
+    }
+  }
+  
+  return {
+    projectToCategory,    // e.g., { "DH": "CATIC", "GovHub": "CATIC", "MJFF": "SDSU" }
+    categoryToProjects,   // e.g., { "CATIC": ["DH", "GovHub"], "SDSU": ["MJFF"] }
+    hasCustomMappings: Object.keys(projectToCategory).length > 0
   };
 }
 
@@ -200,12 +249,34 @@ function categorizeEntriesForGeekbot(allEntries, userId) {
       // Extract clean project name for grouping
       const cleanProjectName = projectName.replace(/^\[LSM\]\s*/, '').trim();
       // Try to match with discovered project directories
-      const matchedProject = CONFIG.projects.find(proj => 
-        cleanProjectName.toLowerCase().includes(proj.toLowerCase()) ||
-        proj.toLowerCase().includes(cleanProjectName.toLowerCase())
-      );
+      // Enhanced matching: check directory name inclusion and common abbreviations
+      const matchedProject = CONFIG.projects.find(proj => {
+        const projLower = proj.toLowerCase();
+        const nameLower = cleanProjectName.toLowerCase();
+        
+        // Direct containment check
+        if (nameLower.includes(projLower) || projLower.includes(nameLower)) {
+          return true;
+        }
+        
+        // Common abbreviation patterns
+        if (projLower === 'dh' && nameLower.includes('dartmouth')) return true;
+        if (projLower === 'govhub' && nameLower.includes('georgia')) return true;
+        if (projLower === 'mjff' && nameLower.includes('mjff')) return true;
+        
+        return false;
+      });
       
-      const categoryKey = matchedProject || cleanProjectName.split(' ')[0]; // Use first word if no match
+      // Determine category key
+      let categoryKey;
+      
+      // Apply project mapping if configured and matched project exists
+      if (matchedProject && CONFIG.projectMappings.hasCustomMappings) {
+        categoryKey = CONFIG.projectMappings.projectToCategory[matchedProject] || matchedProject;
+      } else {
+        // Fallback to matched project or first word of project name
+        categoryKey = matchedProject || cleanProjectName.split(' ')[0];
+      }
       
       if (!categories.clientProjects[categoryKey]) {
         categories.clientProjects[categoryKey] = [];
@@ -388,6 +459,55 @@ function generateRawDataForLLM(days = 1, reportType = 'geekbot', quiet = false, 
   return rawData;
 }
 
+/**
+ * Get configured project categories for report generation
+ * 
+ * Returns the categories that should be used in reports, either from 
+ * project mappings or discovered projects.
+ * 
+ * @returns {Array} Array of category names for report generation
+ */
+function getReportCategories() {
+  if (CONFIG.projectMappings.hasCustomMappings) {
+    // Use categories from project mappings
+    return Object.keys(CONFIG.projectMappings.categoryToProjects).sort();
+  } else {
+    // Fallback to discovered projects
+    return CONFIG.projects.slice().sort();
+  }
+}
+
+/**
+ * Generate dynamic report template for weekly reports
+ * 
+ * Creates the template structure that will be used by the LLM to generate
+ * clean reports with the correct project categories.
+ * 
+ * @returns {string} Template string for LLM processing
+ */
+function generateReportTemplate() {
+  const categories = getReportCategories();
+  
+  let template = "**REPORT 1: LSM Office Hour Update**\n";
+  
+  // Generate office hour status for each category
+  categories.forEach(category => {
+    template += `${category} :large_green_circle:\n`;
+    template += `- [clean summary without hashtags]\n\n`;
+  });
+  
+  template += "**REPORT 2: LSM Weekly Update**\n";
+  
+  // Generate weekly update sections for each category
+  categories.forEach(category => {
+    template += `## ${category} Project Update\n`;
+    template += `**This Week:** [summary of accomplishments]\n`;
+    template += `**Status:** On track\n\n`;
+  });
+  
+  return template.trim();
+}
+
 // Minimal CLI interface for LLM workflow
 function main() {
   const args = process.argv.slice(2);
@@ -424,6 +544,26 @@ function main() {
       console.log(cleanGeekbot || 'No entries found');
       break;
       
+    case 'report-template':
+      const template = generateReportTemplate();
+      console.log('📋 Dynamic Report Template:');
+      console.log('=' .repeat(60));
+      console.log(template);
+      console.log('=' .repeat(60));
+      break;
+      
+    case 'report-categories':
+      const categories = getReportCategories();
+      console.log('📊 Configured Report Categories:');
+      console.log(categories.join(', '));
+      if (CONFIG.projectMappings.hasCustomMappings) {
+        console.log('\n📋 Project Mappings:');
+        Object.entries(CONFIG.projectMappings.projectToCategory).forEach(([project, category]) => {
+          console.log(`  ${project} → ${category}`);
+        });
+      }
+      break;
+      
     case 'help':
     default:
       console.log(`
@@ -436,6 +576,8 @@ Commands:
   raw-weekly                               Generate raw data for LLM processing (Weekly, 7 days)
   clean-geekbot [days] [exclude-internal]  Generate clean data for LLM (Geekbot, no headers)
   clean-weekly                             Generate clean data for LLM (Weekly, no headers)
+  report-template                          Generate dynamic report template for weekly reports
+  report-categories                        Show configured report categories and project mappings
   help                                     Show this help message
 
 Options:
@@ -446,6 +588,8 @@ Examples:
   node generate-reports.js raw-geekbot 1
   node generate-reports.js clean-geekbot 2 exclude-internal
   node generate-reports.js clean-weekly
+  node generate-reports.js report-template
+  node generate-reports.js report-categories
       `);
       break;
   }
@@ -456,5 +600,7 @@ if (require.main === module) {
 }
 
 module.exports = {
-  generateRawDataForLLM
+  generateRawDataForLLM,
+  getReportCategories,
+  generateReportTemplate
 }; 

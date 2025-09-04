@@ -80,8 +80,11 @@ RAW_DATA=$(node "$SCRIPT_DIR/generate-reports.js" clean-weekly 2>/dev/null)
 # Check if we have data to process
 if [ -z "$RAW_DATA" ] || echo "$RAW_DATA" | grep -q "No entries found"; then
     echo "⚠️  No entries found this week. Generating fallback response..."
+    
+    # Generate dynamic fallback response using discovered projects
+    CATEGORIES=$(node "$SCRIPT_DIR/generate-reports.js" report-categories 2>/dev/null | tail -n +2)
     fallback_response="**REPORT 1: LSM Office Hour Update**
-No updates this week for configured projects.
+No updates this week for configured projects: $CATEGORIES
 
 **REPORT 2: LSM Weekly Update**
 ## Project Updates
@@ -99,24 +102,14 @@ No updates this week for configured projects.
     exit 0
 fi
 
+# Generate dynamic system prompt using discovered projects
+echo "🎯 Generating dynamic report template..."
+REPORT_TEMPLATE=$(echo "**REPORT 1: LSM Office Hour Update**"; node "$SCRIPT_DIR/generate-reports.js" report-template 2>/dev/null | sed -n '4,$p' | sed '$d')
+
 # Create system prompt for Claude Code
 SYSTEM_PROMPT="Please process this time tracking data and create two clean reports by removing hashtags and summarizing activities:
 
-**REPORT 1: LSM Office Hour Update**
-CATIC :large_green_circle:
-- [clean summary without hashtags]
-
-SDSU :large_green_circle:
-- [clean summary without hashtags]
-
-**REPORT 2: LSM Weekly Update**
-## CATIC Project Update
-**This Week:** [summary of accomplishments]
-**Status:** On track
-
-## SDSU Project Update  
-**This Week:** [summary of accomplishments]
-**Status:** On track"
+$REPORT_TEMPLATE"
 
 # Use Claude Code CLI with system prompt
 echo "🤖 Processing with Claude Code..."
