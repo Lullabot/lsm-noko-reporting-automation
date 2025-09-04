@@ -72,6 +72,15 @@ if [ -z "$data_dir" ]; then
     data_dir="./data"
 fi
 
+# Project Mapping Configuration (optional)
+echo ""
+echo "🔗 PROJECT MAPPING CONFIGURATION (Optional)"
+echo "Map discovered projects to report categories for grouped reporting."
+echo "Format: Project1:Category1,Project2:Category1,Project3:Category2"
+echo "Example: DH:ClientA,GovHub:ClientA,MJFF:ClientB"
+echo "Leave empty to use project names directly in reports."
+read -p "Enter project mappings (or press Enter to skip): " project_mappings
+
 # Anthropic API Key (optional)
 echo ""
 echo "🤖 ANTHROPIC API KEY (Optional - for LLM-powered reports)"
@@ -99,6 +108,13 @@ echo "PROJECTS=$projects_input" >> .env
 if [ -n "$project_ids" ]; then
     echo "" >> .env
     echo -e "$project_ids" >> .env
+fi
+
+# Add project mappings
+if [ -n "$project_mappings" ]; then
+    echo "" >> .env
+    echo "# Project Mapping Configuration" >> .env
+    echo "PROJECT_MAPPINGS=$project_mappings" >> .env
 fi
 
 # Add directory configuration

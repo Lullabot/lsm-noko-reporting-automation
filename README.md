@@ -175,6 +175,25 @@ data/
     └── memory-bank/
 ```
 
+### Project Mapping Configuration
+
+**NEW**: Configure how discovered projects map to report categories:
+
+```bash
+# Map multiple projects to single categories for grouped reporting
+PROJECT_MAPPINGS="DH:ClientA,GovHub:ClientA,MJFF:ClientB,LSM:General"
+
+# This creates reports with categories: ClientA, ClientB, General
+# Instead of: DH, GovHub, MJFF, LSM
+```
+
+**Use cases:**
+- **Client grouping**: Map multiple related projects to client names
+- **Department grouping**: Group projects by organizational structure  
+- **Custom categories**: Use any meaningful category names for your team
+
+**Default behavior** (no PROJECT_MAPPINGS): Uses discovered project names directly
+
 ### API Keys
 
 **Noko API Token:**
